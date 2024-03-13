@@ -1,0 +1,62 @@
+
+# @name login
+POST https://dev-8cvq4bjo02vym8zq.us.auth0.com/oauth/token
+Content-Type: application/json
+
+{"client_id":"{{client_id}}",
+"client_secret":"{{client_secret}}",
+"audience":"{{audience}}",
+"grant_type":"client_credentials"}
+
+
+###
+POST http://localhost:3000/events
+Content-Type: application/json
+
+{
+    "name" : "Test Event 13123",
+    "start_sale_date_time": "2024-03-23T18:25:43.511Z",
+    "end_sale_date_time": "2024-04-23T18:25:43.511Z",
+    "start_date_time": "2024-04-22T18:25:43.511Z",
+    "end_date_time": "2024-04-23T18:25:43.511Z"
+}
+#######################################
+#Invalid request
+POST http://localhost:3000/events
+Content-Type: application/json
+
+{
+    "name" : "",
+    "start_sale_date_time": "2024-05-23T18:25:43.511Z",
+    "end_sale_date_time": "2024-04-23T18:25:43.511Z",
+    "start_date_time": "2024-05-23T18:25:43.511Z",
+    "end_date_time": "2024-04-23T18:25:43.511Z"
+}
+
+#########################################
+
+@authToken = {{login.response.body.$.access_token}}
+# @name GetEvents
+GET http://localhost:3000/events
+Authorization: Bearer {{authToken}}
+
+###
+POST http://localhost:3000/inventories/generate
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "event_id" : "65e570869825fdfdf094d34d",
+    "number_to_create": 1200
+}
+
+###
+POST http://localhost:3000/inventories/batch
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "event_id" : "65e7d1c90d0410b63c1c051a",
+    "quantity" : 10,
+    "generate_inventory_id" : "65ead4ccc38bf6df0f99213b"
+}

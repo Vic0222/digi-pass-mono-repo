@@ -1,0 +1,37 @@
+{
+    "version": "0",
+    "id": "81881b83-11c5-e9b8-d491-ea03f09a34d1",
+    "detail-type": "MongoDB Database Trigger for DigiPassDb.",
+    "source": "aws.partner/mongodb.com/stitch.trigger/65ec194a713e980c34e036ca",
+    "account": "804044947820",
+    "time": "2024-03-12T01:09:28Z",
+    "region": "ap-southeast-1",
+    "resources": [
+        "arn:aws:events:ap-southeast-1::event-source/aws.partner/mongodb.com/stitch.trigger/65ec194a713e980c34e036ca"
+    ],
+    "detail": {
+        "_id": {
+            "_data": "8265EFAB48000000142B042C0100296E5A100417B77471D07A4A349565111540B8721B463C6F7065726174696F6E54797065003C696E736572740046646F63756D656E744B65790046645F6964006465EFAB1E228D2770CD5C07A7000004"
+        },
+        "operationType": "insert",
+        "clusterTime": {
+            "T": 1710205768,
+            "I": 20
+        },
+        "wallTime": "2024-03-12T01:09:28.642Z",
+        "fullDocument": {
+            "_id": "65efab1e228d2770cd5c07a7",
+            "event_id": "65e7d1c90d0410b63c1c051a",
+            "number_to_create": 67,
+            "status": "Pending",
+            "created_at": "2024-03-12T01:08:46.552Z"
+        },
+        "ns": {
+            "db": "DigiPassDb",
+            "coll": "GenerateInventories"
+        },
+        "documentKey": {
+            "_id": "65efab1e228d2770cd5c07a7"
+        }
+    }
+}

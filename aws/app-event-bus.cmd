@@ -1,0 +1,1 @@
+aws cloudformation update-stack --stack-name digi-pass-event-bus --template-body file://event-bus.yaml --capabilities CAPABILITY_AUTO_EXPAND
