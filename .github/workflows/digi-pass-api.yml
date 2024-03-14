@@ -17,8 +17,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+    - name: Install Zig toolchain
+      uses: korandoru/setup-zig@v1
+      with:
+        zig-version: 0.10.0
+    - name: Install Cargo Lambda
+      uses: jaxxstorm/action-install-gh-release@v1.9.0
+      with:
+        repo: cargo-lambda/cargo-lambda
+        platform: linux # Other valid options: 'windows' or 'darwin'
+        arch: aarch64 # Other valid options for linux: 'aarch64'
+    # Add your build steps below
