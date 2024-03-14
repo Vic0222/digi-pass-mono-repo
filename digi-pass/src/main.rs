@@ -5,6 +5,7 @@ mod validation;
 pub mod helpers;
 
 use std::env;
+use aws_sdk_secretsmanager::types::Filter;
 use dotenv::dotenv;
 
 use axum::{
@@ -14,6 +15,7 @@ use mongodb::Client;
 use serde::Serialize;
 use tower_http::trace::{self, TraceLayer};
 use tracing::Level;
+use tracing_subscriber::EnvFilter;
 
 use crate::{app_state::AppState, events::{event_manager::EventManager, event_repository::MongoDbEventRepository}, inventories::{inventory_manager::InventoryManager, inventory_repository::MongoDbInventoryRepository}};
 
@@ -22,13 +24,42 @@ use jwt_authorizer::{Authorizer, IntoLayer};
 
 use serde_json::Value;
 
+pub async fn load_secrets() -> anyhow::Result<()> {
+    
+    if env::var("AWS_LAMBDA_FUNCTION_NAME").is_err() {
+        tracing::info!("Not in lambda, not loading secrets");
+        return Ok(())
+    }
+    tracing::debug!("Loading Secrets:");
+    let config = aws_config::load_from_env().await;
+    let client = aws_sdk_secretsmanager::Client::new(&config);
+    let filter = Filter::builder().key("name".into()).values("DigiPass__").build();
+    let resp = client.list_secrets().filters(filter).send().await?;
+    let secrets = resp.secret_list();
+    tracing::debug!("Loading Secrets 222: {:?}", secrets);
+    for secret in secrets {
+        
+        tracing::debug!("Secret found: {:?}", secret.name());
+        if let Some(name) = secret.name() {
+            let resp = client.get_secret_value().secret_id(name).send().await?;
+            let name = name.replace("DigiPass__", "");
+            env::set_var(&name, resp.secret_string().ok_or(anyhow::anyhow!("Failed getting secret"))?);
+        }
+    }
+    Ok(())
+}
+
+
 #[tokio::main]
 async fn main() {
     // initialize tracing
-    tracing_subscriber::fmt().json().init();
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .compact().init();
 
     tracing::info!("loading env variables from file");
-    dotenv().ok();
+    dotenv().expect("Failed loading .env file");
+    load_secrets().await.expect("Failed loading secrets");
 
     let issuer = env::var("JwtConfig__Issuer").expect("Jwt issuer not found");
     let audience = env::var("JwtConfig__Audience").expect("Jwt audience not found");
