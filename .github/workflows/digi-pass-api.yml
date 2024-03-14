@@ -41,4 +41,4 @@ jobs:
           cargo lambda build --release --arm64 
     - uses: actions/upload-artifact@v4
       with:
-        path: ./
+        path: ./digi-pass/target/lambda/
