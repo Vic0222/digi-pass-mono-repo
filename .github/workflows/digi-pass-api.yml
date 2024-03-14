@@ -36,7 +36,9 @@ jobs:
         key: cargo-build-cache
 
     - name: Release lambda
-      run: cargo lambda build --release --arm64 
+      run: |
+          pip install cargo-lambda
+          cargo lambda build --release --arm64 
     - uses: actions/upload-artifact@v4
       with:
         path: target/lambda/
