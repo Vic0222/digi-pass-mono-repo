@@ -1,0 +1,116 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Deploy DigiPassApi Lambda
+Parameters:
+  ModuleName: #Name of the Lambda Module
+    Description: The name of the .NET file
+    Type: String
+    Default: "DigiPassApi"
+
+
+
+Resources:
+  LambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: "Digi Pass API"
+      FunctionName: DigiPassApi
+      Handler: bootstrap
+      Runtime: provided.al2
+      MemorySize: 128
+      Architectures:
+      - arm64
+      Timeout: 30
+      CodeUri: "../../digi-pass/target/lambda/digi-pass/"
+      Policies:
+      - AWSLambda_FullAccess
+      Events:
+        VersionResource:
+          Type: Api
+          Properties:
+            Path: "/"
+            Method: GET
+            RestApiId:
+              Ref: RestApi
+        RootResources:
+          Type: Api
+          Properties:
+            Path: "/{proxy+}"
+            Method: ANY
+            RestApiId:
+              Ref: RestApi
+            Auth:
+              ApiKeyRequired: true   
+
+  RestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Dev
+    
+  DigiPassAPIGatewayUsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    Properties:
+      ApiStages:
+        - ApiId: !Ref RestApi
+          Stage: !Ref ApiProdStage
+      Description: Digi Pass API Usage Plan
+      Throttle:
+        BurstLimit: 1000
+        RateLimit: 100
+      UsagePlanName: DigiPassAPIUsagePlan
+
+  # Enable ApiKey
+  DigiPassAPIGatewayApiKey:
+    Type: AWS::ApiGateway::ApiKey
+    Properties:
+      Name: DigiPassAPIUsagePlan
+      Description: API Key for use with DigiPassAPIUsagePlan
+      Enabled: 'true'
+      StageKeys:
+        - RestApiId: !Ref RestApi
+          StageName: !Ref ApiProdStage
+
+  DigiPassAPIGatewayApiKeyUsage:
+    Type: AWS::ApiGateway::UsagePlanKey
+    Properties:
+      UsagePlanId: !Ref DigiPassAPIGatewayUsagePlan
+      KeyType: API_KEY
+      KeyId: !Ref DigiPassAPIGatewayApiKey
+
+  ApiDeployment2:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref RestApi
+      Description: "DigiPassAPIUsagePlan deployment"
+
+  ApiProdStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      StageName: Prod
+      Description: Prod Stage
+      RestApiId: !Ref RestApi
+      DeploymentId: !Ref ApiDeployment2
+
+  APIGatewayRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: ''
+            Effect: 'Allow'
+            Principal:
+              Service:
+                - 'apigateway.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      Path: '/'
+      ManagedPolicyArns:
+      - >-
+        arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+  Account:
+    Type: 'AWS::ApiGateway::Account'
+    Properties:
+      CloudWatchRoleArn: !GetAtt 
+        - APIGatewayRole
+        - Arn

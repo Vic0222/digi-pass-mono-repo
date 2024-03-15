@@ -58,7 +58,9 @@ async fn main() {
         .compact().init();
 
     tracing::info!("loading env variables from file");
-    dotenv().expect("Failed loading .env file");
+    if let Ok(_) = dotenv() {
+        tracing::info!("Env variables from file successful");
+    }
     load_secrets().await.expect("Failed loading secrets");
 
     let issuer = env::var("JwtConfig__Issuer").expect("Jwt issuer not found");
