@@ -52,6 +52,11 @@ Resources:
       Role: !GetAtt LambdaIAMRole.Arn
       Policies:
       - AWSLambda_FullAccess
+      Environment:
+        MongoDbConfig__Database: DigiPass
+        JwtConfig__Issuer: https://dev-8cvq4bjo02vym8zq.us.auth0.com/
+        JwtConfig__Audience: http://localhost:3000/
+        RUST_LOG: "info,digi_pass=debug"
       Events:
         VersionResource:
           Type: Api
