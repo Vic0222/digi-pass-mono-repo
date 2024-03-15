@@ -13,8 +13,8 @@ Resources:
   LambdaIAMRole:
     Type: AWS::IAM::Role
     Properties:
-      Description: "{{ LambdaPackageName }} Lambda execution role"
-      RoleName: "{{ LambdaPackageName }}ExecutionRole"
+      Description: " Lambda execution role"
+      RoleName: "LambdaExecutionRole"
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -49,6 +49,7 @@ Resources:
       - arm64
       Timeout: 30
       CodeUri: "../../digi-pass/target/lambda/digi-pass/"
+      Role: !GetAtt LambdaIAMRole.Arn
       Policies:
       - AWSLambda_FullAccess
       Events:
