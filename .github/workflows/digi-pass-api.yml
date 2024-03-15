@@ -41,6 +41,7 @@ jobs:
           cargo lambda build --release --arm64 
     - uses: actions/upload-artifact@v4
       with:
+        name: lambda
         path: ./digi-pass/target/lambda/
 
   deploy:
@@ -60,7 +61,7 @@ jobs:
         aws-region: ${{ secrets.REGION }}
     - uses: actions/download-artifact@v4.1.4
       with: 
-        path: ../../digi-pass/target/lambda/
+        path: ../../digi-pass/target/
     - name: Deploy lambda
       run: |
           tree
