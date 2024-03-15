@@ -47,7 +47,7 @@ jobs:
     needs: build
     defaults:
       run:
-        working-directory: ./aws
+        working-directory: ./aws/digi-pass/
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -60,7 +60,7 @@ jobs:
         aws-region: ${{ secrets.REGION }}
     - uses: actions/download-artifact@v4.1.4
       with: 
-        path: ../digi-pass/target/lambda/
+        path: ../../digi-pass/target/lambda/
     - name: Deploy lambda
       run: |
           tree
