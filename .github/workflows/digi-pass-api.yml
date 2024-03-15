@@ -35,7 +35,10 @@ jobs:
           ~/.cargo/git
         key: cargo-build-cache
     - name: Install libssl
-      run: sudo apt install libssl-dev
+      run: |
+          sudo apt install libssl-dev
+          sudo apt install pkg-config
+          sudo apt install libudev-dev
       
     - name: Build lambda
       run: |
