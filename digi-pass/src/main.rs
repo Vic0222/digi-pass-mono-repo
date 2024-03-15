@@ -6,6 +6,8 @@ pub mod helpers;
 
 use std::env;
 use aws_sdk_secretsmanager::types::Filter;
+use lambda_http::run;
+
 use dotenv::dotenv;
 
 use axum::{
@@ -26,7 +28,7 @@ use serde_json::Value;
 
 pub async fn load_secrets() -> anyhow::Result<()> {
     
-    if env::var("AWS_LAMBDA_FUNCTION_NAME").is_err() {
+    if !is_running_in_lambda() {
         tracing::info!("Not in lambda, not loading secrets");
         return Ok(())
     }
@@ -47,6 +49,10 @@ pub async fn load_secrets() -> anyhow::Result<()> {
         }
     }
     Ok(())
+}
+
+fn is_running_in_lambda() -> bool {
+    env::var("AWS_LAMBDA_FUNCTION_NAME").is_ok()
 }
 
 
@@ -126,10 +132,13 @@ async fn main() {
                 .on_response(trace::DefaultOnResponse::new().level(Level::INFO)),
         )
         .with_state(state);
-
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.expect("Failed to bind");
-    tracing::info!("listening on {}", listener.local_addr().expect("failed to get local address"));
-    axum::serve(listener, app).await.expect("Failed to start server");
+    if is_running_in_lambda() {
+        run(app).await.expect("Failed running in lambda");
+    }else{
+        let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.expect("Failed to bind");
+        tracing::info!("listening on {}", listener.local_addr().expect("failed to get local address"));
+        axum::serve(listener, app).await.expect("Failed to start server");
+    }
 }
 
 #[derive(Serialize)]
