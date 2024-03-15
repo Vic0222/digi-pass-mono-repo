@@ -39,8 +39,22 @@ jobs:
       run: |
           pip install cargo-lambda
           cargo lambda build --release --arm64 
+    - uses: actions/upload-artifact@v4
+      with:
+        path: ./digi-pass/target/lambda/
+
+  deploy:
+    defaults:
+      run:
+        working-directory: ./digi-pass/aws
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: aws-actions/setup-sam@v2
+    - uses: actions/download-artifact@v4.1.4
+      with: 
+        path: ../digi-pass/target/lambda/
     - name: Deploy lambda
-      working-directory: ./aws/digi-pass-api
       run: |
           aws cloudformation package  --template ./template.yml --s3-bucket digipass.deployment --output-template-file packaged-template.yml
           aws cloudformation update-stack --stack-name digi-pass-api --template-body file://packaged-template.yml --capabilities CAPABILITY_AUTO_EXPAND, CAPABILITY_IAM
