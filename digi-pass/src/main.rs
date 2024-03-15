@@ -126,6 +126,7 @@ async fn main() {
         .layer(jwt_auth.into_layer())
         
         .route("/", get(index))
+        .route("/version", get(index))
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
