@@ -100,7 +100,6 @@ async fn main() {
     // build our application with a route
     let app = Router::<AppState>::new()
         // `GET /` goes to `root`
-        .route("/", get(index))
         .route(
             "/events",
             post(self::events::events_controller::create),
@@ -117,6 +116,8 @@ async fn main() {
             post(self::inventories::inventories_controller::add_batch),
         )
         .layer(jwt_auth.into_layer())
+        
+        .route("/", get(index))
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))

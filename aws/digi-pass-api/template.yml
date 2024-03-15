@@ -10,6 +10,33 @@ Parameters:
 
 
 Resources:
+  LambdaIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: "{{ LambdaPackageName }} Lambda execution role"
+      RoleName: "{{ LambdaPackageName }}ExecutionRole"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Principal:
+              Service: "lambda.amazonaws.com"
+            Effect: Allow
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole #Permission to upload logs to CloudWatch
+        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+        - arn:aws:iam::aws:policy/SecretsManagerReadWrite 
+      Policies:
+      - PolicyName: cloudwatchPutMetricData
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - cloudwatch:PutMetricData
+            Resource: '*'
+            
   LambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
