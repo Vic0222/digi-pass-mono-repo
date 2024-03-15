@@ -47,7 +47,7 @@ jobs:
     needs: build
     defaults:
       run:
-        working-directory: ./aws/digi-pass/
+        working-directory: ./aws/digi-pass-api/
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
