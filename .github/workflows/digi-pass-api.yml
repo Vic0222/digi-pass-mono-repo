@@ -44,6 +44,7 @@ jobs:
         path: ./digi-pass/target/lambda/
 
   deploy:
+    needs: build
     defaults:
       run:
         working-directory: ./aws
