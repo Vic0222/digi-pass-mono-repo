@@ -52,15 +52,18 @@ pub async fn load_secrets() -> anyhow::Result<()> {
 
 #[tokio::main]
 async fn main() {
-    // initialize tracing
-    tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env())
-        .compact().init();
 
     tracing::info!("loading env variables from file");
     if let Ok(_) = dotenv() {
         tracing::info!("Env variables from file successful");
     }
+
+    // initialize tracing
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .compact().init();
+
+    
     load_secrets().await.expect("Failed loading secrets");
 
     let issuer = env::var("JwtConfig__Issuer").expect("Jwt issuer not found");
@@ -84,7 +87,6 @@ async fn main() {
     let client = Client::with_uri_str(connection_string)
         .await
         .expect("Failed creating mongodb client");
-
     
 
     let event_repository = Box::new(MongoDbEventRepository::new(client.clone(), database.clone()));
@@ -96,7 +98,7 @@ async fn main() {
         event_manager,
         inventory_manager,
     };
-
+    
     // build our application with a route
     let app = Router::<AppState>::new()
         // `GET /` goes to `root`
@@ -125,8 +127,6 @@ async fn main() {
         )
         .with_state(state);
 
-    // run our app with hyper, listening globally on port 3000
-    // run our app with hyper
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.expect("Failed to bind");
     tracing::info!("listening on {}", listener.local_addr().expect("failed to get local address"));
     axum::serve(listener, app).await.expect("Failed to start server");
