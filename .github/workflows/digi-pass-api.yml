@@ -34,7 +34,9 @@ jobs:
           ~/.cargo/registry
           ~/.cargo/git
         key: cargo-build-cache
-
+    - name: Install libssl
+      run: apt install libssl-dev
+      
     - name: Build lambda
       run: |
           pip install cargo-lambda
