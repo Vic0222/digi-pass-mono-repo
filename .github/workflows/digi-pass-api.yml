@@ -46,7 +46,7 @@ jobs:
   deploy:
     defaults:
       run:
-        working-directory: ./digi-pass/aws
+        working-directory: ./aws
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
