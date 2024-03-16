@@ -63,7 +63,7 @@ jobs:
         aws-region: ${{ secrets.REGION }}
     - uses: actions/download-artifact@v4.1.4
       with: 
-        run-id: 8309197244
+        run-id: 22740293000
         path: ./generate-inventory-handler/target/
     - name: Deploy lambda
       run: |
