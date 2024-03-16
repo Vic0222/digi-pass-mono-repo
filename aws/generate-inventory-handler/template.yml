@@ -43,6 +43,11 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: GenerateInventoryQueue
+  
+  GenerateInventoryDLQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: GenerateInventoryDLQueue
 
   GenerateInventoryQueueRule:
     Type: 'AWS::Events::Rule'
@@ -70,6 +75,12 @@ Resources:
              - "GenerateInventoryQueue"
              - "Arn"
          Id: "GenerateInventoryQueue"
+         DeadLetterConfig:
+          Arn: 
+            Fn::GetAtt:
+             - "GenerateInventoryDLQueue"
+             - "Arn"
+
 
   LambdaFunction:
     Type: AWS::Serverless::Function
