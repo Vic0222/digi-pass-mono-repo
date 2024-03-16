@@ -1,4 +1,4 @@
-name: Deploy generate inventory handler
+name: Deploy event bus
 
 on:
   workflow_dispatch:
