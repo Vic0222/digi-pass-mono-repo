@@ -82,7 +82,7 @@ Resources:
       Architectures:
       - arm64
       Timeout: 30
-      CodeUri: "../../generate-inventory-handler/target/lambda/digi-pass/"
+      CodeUri: "../../generate-inventory-handler/target/lambda/generate-inventory-handler/"
       Role: !GetAtt LambdaIAMRole.Arn
       Policies:
       - AWSLambda_FullAccess
