@@ -54,7 +54,7 @@ Resources:
       - AWSLambda_FullAccess
       Environment:
         Variables:
-          MongoDbConfig__Database: DigiPass
+          MongoDbConfig__Database: DigiPassDb
           JwtConfig__Issuer: https://dev-8cvq4bjo02vym8zq.us.auth0.com/
           JwtConfig__Audience: http://localhost:3000/
           RUST_LOG: "info,digi_pass=debug"

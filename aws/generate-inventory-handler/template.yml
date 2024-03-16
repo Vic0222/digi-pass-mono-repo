@@ -88,7 +88,7 @@ Resources:
       - AWSLambda_FullAccess
       Environment:
         Variables:
-          MongoDbConfig__Database: DigiPass
+          MongoDbConfig__Database: DigiPassDb
           OAuth__AuthorizeUrl: https://dev-8cvq4bjo02vym8zq.us.auth0.com/authorize
           OAuth__TokenUrl: https://dev-8cvq4bjo02vym8zq.us.auth0.com/oauth/token
           DigiPassBaseUrl: https://c8heyw42u5.execute-api.ap-southeast-1.amazonaws.com/Prod
