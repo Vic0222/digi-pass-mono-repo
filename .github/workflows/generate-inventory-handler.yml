@@ -7,47 +7,47 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  # build:
-  #   defaults:
-  #     run:
-  #       working-directory: ./generate-inventory-handler
-  #   runs-on: ubuntu-latest
+  build:
+    defaults:
+      run:
+        working-directory: ./generate-inventory-handler
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #   - uses: actions/checkout@v3
+    steps:
+    - uses: actions/checkout@v3
 
-  #   - name: Install Rust
-  #     uses: actions-rs/toolchain@v1
-  #     with:
-  #       toolchain: stable
-  #       profile: minimal
-  #       override: true
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        profile: minimal
+        override: true
 
-  #   - name: Cache cargo registry
-  #     uses: actions/cache@v3
-  #     continue-on-error: false
-  #     with:
-  #       path: |
-  #         ~/.cargo/registry
-  #         ~/.cargo/git
-  #       key: cargo-build-cache
-  #   - name: Install libssl
-  #     run: |
-  #         sudo apt install libssl-dev
-  #         sudo apt install pkg-config
-  #         sudo apt install libudev-dev
+    - name: Cache cargo registry
+      uses: actions/cache@v3
+      continue-on-error: false
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: cargo-build-cache
+    - name: Install libssl
+      run: |
+          sudo apt install libssl-dev
+          sudo apt install pkg-config
+          sudo apt install libudev-dev
       
-  #   - name: Build lambda
-  #     run: |
-  #         pip install cargo-lambda
-  #         cargo lambda build --release --arm64 
-  #   - uses: actions/upload-artifact@v4
-  #     with:
-  #       name: lambda
-  #       path: ./generate-inventory-handler/target/lambda/
+    - name: Build lambda
+      run: |
+          pip install cargo-lambda
+          cargo lambda build --release --arm64 
+    - uses: actions/upload-artifact@v4
+      with:
+        name: lambda
+        path: ./generate-inventory-handler/target/lambda/
 
   deploy:
-    # needs: build
+    needs: build
     defaults:
       run:
         working-directory: ./aws/generate-inventory-handler/
@@ -63,7 +63,6 @@ jobs:
         aws-region: ${{ secrets.REGION }}
     - uses: actions/download-artifact@v4.1.4
       with: 
-        run-id: 22740293000
         path: ./generate-inventory-handler/target/
     - name: Deploy lambda
       run: |
