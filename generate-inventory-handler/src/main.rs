@@ -25,16 +25,13 @@ async fn main() -> anyhow::Result<()> {
     let format = fmt::format().without_time().with_target(false).compact();
 
     tracing_subscriber::fmt().event_format(format).init();
-
-    dotenvy::dotenv()?;
-
     
-
     if is_running_in_lambda() {
         load_secrets().await.expect("failed to load secrets");
         run(service_fn(function_handler)).await.expect("failed to start LambdaRuntime");
         
     }else{
+        dotenvy::dotenv()?;
         local().await.expect("failed to start local server");
     }
 
