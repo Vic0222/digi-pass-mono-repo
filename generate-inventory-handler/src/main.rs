@@ -16,7 +16,7 @@ use aws_lambda_events::{event::sqs::SqsEventObj, sqs::{BatchItemFailure, SqsBatc
 use model::Event;
 use tokio::time::sleep;
 use tracing_subscriber::fmt;
-
+use aws_sdk_secretsmanager::types::Filter;
 use crate::generate_inventory::GenerateInventoryHandler;
 
 
@@ -31,6 +31,7 @@ async fn main() -> anyhow::Result<()> {
     
 
     if is_running_in_lambda() {
+        load_secrets().await.expect("failed to load secrets");
         run(service_fn(function_handler)).await.expect("failed to start LambdaRuntime");
         
     }else{
@@ -42,6 +43,31 @@ async fn main() -> anyhow::Result<()> {
 
 fn is_running_in_lambda() -> bool {
     env::var("AWS_LAMBDA_FUNCTION_NAME").is_ok()
+}
+
+pub async fn load_secrets() -> anyhow::Result<()> {
+    
+    if !is_running_in_lambda() {
+        tracing::info!("Not in lambda, not loading secrets");
+        return Ok(())
+    }
+    tracing::debug!("Loading Secrets:");
+    let config = aws_config::load_from_env().await;
+    let client = aws_sdk_secretsmanager::Client::new(&config);
+    let filter = Filter::builder().key("name".into()).values("DigiPass__").build();
+    let resp = client.list_secrets().filters(filter).send().await?;
+    let secrets = resp.secret_list();
+    tracing::debug!("Loading Secrets 222: {:?}", secrets);
+    for secret in secrets {
+        
+        tracing::debug!("Secret found: {:?}", secret.name());
+        if let Some(name) = secret.name() {
+            let resp = client.get_secret_value().secret_id(name).send().await?;
+            let name = name.replace("DigiPass__", "");
+            env::set_var(&name, resp.secret_string().ok_or(anyhow::anyhow!("Failed getting secret"))?);
+        }
+    }
+    Ok(())
 }
 
 async fn get_generate_inventory_handler() -> anyhow::Result<GenerateInventoryHandler> {

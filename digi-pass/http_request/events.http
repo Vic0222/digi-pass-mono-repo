@@ -37,11 +37,12 @@ Content-Type: application/json
 
 @authToken = {{login.response.body.$.access_token}}
 # @name GetEvents
-GET http://localhost:3000/events
+GET {{baseUrl}}/events
 Authorization: Bearer {{authToken}}
+x-api-key: eMmTHHarRlwJs5BOrUcy6YyumhsFvZZ2fTO7WnE6
 
 ###
-POST http://localhost:3000/inventories/generate
+POST {{baseUrl}}/inventories/generate
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
