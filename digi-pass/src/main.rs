@@ -138,6 +138,7 @@ async fn main() {
         )
         .with_state(state);
     if is_running_in_lambda() {
+        tracing::info!("Running in lambda, starting server");
         run(app).await.expect("Failed running in lambda");
     }else{
         let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.expect("Failed to bind");
