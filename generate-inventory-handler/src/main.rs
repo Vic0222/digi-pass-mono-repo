@@ -11,6 +11,9 @@ use aws_sdk_sqs::{
     types::{DeleteMessageBatchRequestEntry, Message},
     Client,
 };
+use lambda_runtime::{run, service_fn, LambdaEvent};
+use aws_lambda_events::{event::sqs::SqsEventObj, sqs::{BatchItemFailure, SqsBatchResponse}};
+use model::Event;
 use tokio::time::sleep;
 use tracing_subscriber::fmt;
 
@@ -25,8 +28,37 @@ async fn main() -> anyhow::Result<()> {
 
     dotenvy::dotenv()?;
 
-    local().await
+    
+
+    if is_running_in_lambda() {
+        run(service_fn(function_handler)).await.expect("failed to start LambdaRuntime");
+        
+    }else{
+        local().await.expect("failed to start local server");
+    }
+
+    Ok(())
 }
+
+fn is_running_in_lambda() -> bool {
+    env::var("AWS_LAMBDA_FUNCTION_NAME").is_ok()
+}
+
+async fn get_generate_inventory_handler() -> anyhow::Result<GenerateInventoryHandler> {
+    let connection_string = env::var("MongoDbConfig__ConnectionString")?;
+    let database = env::var("MongoDbConfig__Database")?;
+
+    // Create a new client and connect to the server
+    let mongodb_client = mongodb::Client::with_uri_str(connection_string).await?;
+
+    let digi_pass_base_url = env::var("DigiPassBaseUrl")?;
+
+    let oauth_client = oauth_client::get_client()?;
+    let generate_inventory_handler = GenerateInventoryHandler::new(mongodb_client, database, oauth_client, digi_pass_base_url);
+
+    Ok(generate_inventory_handler)
+}
+
 
 async fn local() -> anyhow::Result<()> {
     let queue_url = env::var("AWS_SQS_QUEUE_URL").expect("AWS_SQS_QUEUE_URL must be set");
@@ -44,21 +76,8 @@ async fn local() -> anyhow::Result<()> {
     let shared_config = aws_config::from_env().region(region_provider).load().await;
     let client = Client::new(&shared_config);
 
-    let connection_string = env::var("MongoDbConfig__ConnectionString")
-        .expect("MongoDb connection string not found.");
-    let database = env::var("MongoDbConfig__Database")
-        .expect("MongoDb database not found");
-
-    // Create a new client and connect to the server
-    let mongodb_client = mongodb::Client::with_uri_str(connection_string)
-        .await
-        .expect("Failed creating mongodb client");
-
-    let digi_pass_base_url = env::var("DigiPassBaseUrl")
-        .expect("DigiPassBaseUrl was not found");
-
-    let oauth_client = oauth_client::get_client().expect("Failed creating oauth client");
-    let generate_inventory_handler = GenerateInventoryHandler::new(mongodb_client, database, oauth_client, digi_pass_base_url);
+    let generate_inventory_handler = get_generate_inventory_handler().await?;
+    
     tracing::info!("Starting Loop");
     let sleep_time = 10000;
     loop {
@@ -71,6 +90,7 @@ async fn local() -> anyhow::Result<()> {
         sleep(Duration::from_millis(sleep_time)).await;
     }
 }
+
 
 async fn receive_and_delete(client: &Client, queue_url: &String, generate_inventory_handler: &GenerateInventoryHandler) -> anyhow::Result<()> {
     let rcv_message_output = client.receive_message().queue_url(queue_url).send().await?;
@@ -119,4 +139,26 @@ fn get_delete_entry(message: &Message) -> anyhow::Result<DeleteMessageBatchReque
         }
         _ => Err(anyhow::anyhow!("No message id or receipt handle")),
     }
+}
+
+/// This is the main body for the function.
+/// You can use the data sent into SQS here.
+async fn function_handler(event: LambdaEvent<SqsEventObj<Event>>) -> anyhow::Result<SqsBatchResponse> {
+    let handler = get_generate_inventory_handler().await?;
+    
+    let mut failures: Vec<BatchItemFailure> = vec![];
+    for record in event.payload.records {
+        let result = handler.handle(&record.body).await;
+        
+        if let Err(_) = result {
+            if let Some(message_id) = record.message_id {
+                failures.push(BatchItemFailure { item_identifier: message_id })
+            }
+            
+        }
+    }
+    Ok(SqsBatchResponse {
+        batch_item_failures: failures,
+    })
+
 }

@@ -1,4 +1,4 @@
-name: Deploy Digi Pass API
+name: Deploy generate inventory handler
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ jobs:
   build:
     defaults:
       run:
-        working-directory: ./digi-pass
+        working-directory: ./generate-inventory-handler
     runs-on: ubuntu-latest
 
     steps:
@@ -44,13 +44,13 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: lambda
-        path: ./digi-pass/target/lambda/
+        path: ./generate-inventory-handler/target/lambda/
 
   deploy:
     needs: build
     defaults:
       run:
-        working-directory: ./aws/digi-pass-api/
+        working-directory: ./aws/generate-inventory-handler/
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -63,9 +63,9 @@ jobs:
         aws-region: ${{ secrets.REGION }}
     - uses: actions/download-artifact@v4.1.4
       with: 
-        path: ./digi-pass/target/
+        path: ./generate-inventory-handler/target/
     - name: Deploy lambda
       run: |
           tree
           aws cloudformation package  --template ./template.yml --s3-bucket digipass.deployment --output-template-file packaged-template.yml
-          aws cloudformation update-stack --stack-name digi-pass-api --template-body file://packaged-template.yml --capabilities CAPABILITY_AUTO_EXPAND CAPABILITY_NAMED_IAM CAPABILITY_IAM
+          aws cloudformation update-stack --stack-name generate-inventory-handler --template-body file://packaged-template.yml --capabilities CAPABILITY_AUTO_EXPAND CAPABILITY_NAMED_IAM CAPABILITY_IAM
