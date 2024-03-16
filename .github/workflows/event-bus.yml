@@ -27,4 +27,4 @@ jobs:
     - name: Deploy lambda
       run: |
           tree
-          aws cloudformation update-stack --stack-name generate-inventory-handler --template-body file://template.yml --capabilities CAPABILITY_AUTO_EXPAND CAPABILITY_NAMED_IAM CAPABILITY_IAM
+          aws cloudformation update-stack --stack-name digi-pass-event-bus --template-body file://template.yml --capabilities CAPABILITY_AUTO_EXPAND CAPABILITY_NAMED_IAM CAPABILITY_IAM
