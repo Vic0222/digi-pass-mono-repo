@@ -59,9 +59,9 @@ fn is_running_in_lambda() -> bool {
 #[tokio::main]
 async fn main() {
 
-    tracing::info!("loading env variables from file");
+    println!("loading env variables from file");
     if let Ok(_) = dotenv() {
-        tracing::info!("Env variables from file successful");
+        println!("Env variables from file successful");
     }
 
     // initialize tracing
@@ -69,6 +69,7 @@ async fn main() {
         .with_env_filter(EnvFilter::from_default_env())
         .compact().init();
 
+    lambda_http::tracing::init_default_subscriber();
     
     load_secrets().await.expect("Failed loading secrets");
 
