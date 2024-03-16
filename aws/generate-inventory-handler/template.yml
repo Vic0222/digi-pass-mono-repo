@@ -48,7 +48,7 @@ Resources:
     Type: 'AWS::Events::Rule'
     Properties:
       Description: Default Event Rule
-      EventBusName: !Ref PartnerEventSource
+      EventBusName: !Ref EventBusName
       EventPattern: 
         source: 
         - prefix: "aws.partner/mongodb.com"
@@ -96,6 +96,8 @@ Resources:
         SQSEvent:
           Type: SQS
           Properties:
-            Queue: !Ref GenerateInventoryQueue
+            Enabled: true
+            FunctionResponseTypes:
+              - ReportBatchItemFailures
+            Queue: !GetAtt GenerateInventoryQueue.Arn
             BatchSize: 10
-            RestApiId: !Ref PartnerEventSource
