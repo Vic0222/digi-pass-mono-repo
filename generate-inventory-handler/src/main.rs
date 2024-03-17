@@ -173,7 +173,8 @@ async fn function_handler(event: LambdaEvent<SqsEventObj<Event>>) -> anyhow::Res
     for record in event.payload.records {
         let result = handler.handle(&record.body).await;
         
-        if let Err(_) = result {
+        if let Err(err) = result {
+            tracing::error!("No message body : {:?}", err);
             if let Some(message_id) = record.message_id {
                 failures.push(BatchItemFailure { item_identifier: message_id })
             }
