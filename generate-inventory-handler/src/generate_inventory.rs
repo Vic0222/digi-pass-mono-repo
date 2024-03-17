@@ -10,15 +10,17 @@ pub struct GenerateInventoryHandler {
     pub database: String,
     pub oauth_client: BasicClient,
     pub digi_pass_base_url: String,
+    pub api_key: String
 }
 
 impl GenerateInventoryHandler {
-    pub fn new(client: Client, database: String, oauth_client: BasicClient, digi_pass_base_url: String) -> Self {
+    pub fn new(client: Client, database: String, oauth_client: BasicClient, digi_pass_base_url: String, api_key: String) -> Self {
         GenerateInventoryHandler {
             client,
             database,
             oauth_client,
-            digi_pass_base_url
+            digi_pass_base_url,
+            api_key
         }
     }
 
@@ -69,6 +71,7 @@ impl GenerateInventoryHandler {
             tracing::info!("Sending request" );
             let response = client.post(format!("{}/inventories/batch", self.digi_pass_base_url))
                 .header("Authorization", format!("Bearer {}", token.access_token().secret()))
+                .header("x-api-key", self.api_key.clone())
                 .json(&payload)
                 .send()
                 .await?;

@@ -75,9 +75,10 @@ async fn get_generate_inventory_handler() -> anyhow::Result<GenerateInventoryHan
     let mongodb_client = mongodb::Client::with_uri_str(connection_string).await?;
 
     let digi_pass_base_url = env::var("DigiPassBaseUrl")?;
+    let api_key = env::var("APIKey")?;
 
     let oauth_client = oauth_client::get_client()?;
-    let generate_inventory_handler = GenerateInventoryHandler::new(mongodb_client, database, oauth_client, digi_pass_base_url);
+    let generate_inventory_handler = GenerateInventoryHandler::new(mongodb_client, database, oauth_client, digi_pass_base_url, api_key);
 
     Ok(generate_inventory_handler)
 }

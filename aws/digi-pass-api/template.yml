@@ -95,22 +95,22 @@ Resources:
       UsagePlanName: DigiPassAPIUsagePlan
 
   # Enable ApiKey
-  DigiPassAPIGatewayApiKey:
+  DigiPassAPIGatewayApiKey2:
     Type: AWS::ApiGateway::ApiKey
     Properties:
-      Name: DigiPassAPIUsagePlan
+      Name: DigiPassAPIUsagePlan2
       Description: API Key for use with DigiPassAPIUsagePlan
       Enabled: 'true'
       StageKeys:
         - RestApiId: !Ref RestApi
           StageName: !Ref ApiProdStage
 
-  DigiPassAPIGatewayApiKeyUsage:
+  DigiPassAPIGatewayApiKey2Usage:
     Type: AWS::ApiGateway::UsagePlanKey
     Properties:
       UsagePlanId: !Ref DigiPassAPIGatewayUsagePlan
       KeyType: API_KEY
-      KeyId: !Ref DigiPassAPIGatewayApiKey
+      KeyId: !Ref DigiPassAPIGatewayApiKey2
 
   ApiDeployment2:
     Type: AWS::ApiGateway::Deployment
