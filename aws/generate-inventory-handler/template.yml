@@ -104,6 +104,9 @@ Resources:
           OAuth__TokenUrl: https://dev-8cvq4bjo02vym8zq.us.auth0.com/oauth/token
           DigiPassBaseUrl: https://c8heyw42u5.execute-api.ap-southeast-1.amazonaws.com/Prod
           RUST_LOG: "debug"
+      DeadLetterQueue:
+        TargetArn: !GetAtt GenerateInventoryDLQueue.Arn
+        Type: SQS
       Events:
         SQSEvent:
           Type: SQS
