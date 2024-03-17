@@ -1,5 +1,8 @@
 
+use std::str::FromStr;
+
 use async_trait::async_trait;
+use bson::{doc, oid::ObjectId};
 use dyn_clone::DynClone;
 use mongodb::{options::FindOptions, Client, Collection};
 
@@ -10,6 +13,8 @@ pub trait EventRepository : DynClone + Send + Sync  {
     async fn add(&self, event: data_models::Event) -> anyhow::Result<String>;
 
     async fn list(&self) -> anyhow::Result<Vec<Event>>;
+
+    async fn get_event(&self, event_id: String) -> anyhow::Result<Option<Event>>;
 }
 
 dyn_clone::clone_trait_object!(EventRepository);
@@ -60,6 +65,13 @@ impl EventRepository for MongoDbEventRepository{
             events.push(docs.deserialize_current()?)
         }
         Ok(events)
+    }
+
+    async fn get_event(&self, event_id: String) -> anyhow::Result<Option<Event>>{
+        tracing::info!("Getting event {}", event_id);
+        let event_collection = self.get_collection();
+        let event = event_collection.find_one(doc! {"_id":ObjectId::from_str(&event_id)? }, None).await?;
+        Ok(event)
     }
 }
 

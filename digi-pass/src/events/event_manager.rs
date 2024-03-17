@@ -30,6 +30,10 @@ impl EventManager {
         let events: Vec<EventDetails> = self.event_repository.list().await?.iter().map(|e| {e.into()}).collect();
         Ok(events)
     }
+
+    pub async fn get_event(&self, event_id: String) -> anyhow::Result<Option<Event>> {
+        self.event_repository.get_event(event_id).await
+    }
 }
 
 fn map_event(data: CreateEvent) -> Event {

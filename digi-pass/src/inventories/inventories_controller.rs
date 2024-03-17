@@ -2,7 +2,7 @@ use axum::{extract::State, http::StatusCode, Json};
 
 use crate::{validation::ValidatedJson, AppError};
 
-use super::{data_transfer_objects::{CreateInventoryBatch, GenerateInventory, GenerateInventoryResult}, inventory_manager::InventoryManager};
+use super::{data_transfer_objects::{CreateInventoryBatch, GenerateInventory, GenerateInventoryResult, ReserveInventories, ReserveInventoriesResult}, inventory_manager::InventoryManager};
 
 pub async fn generate_async(
     State(inventory_manager): State<InventoryManager>,
@@ -24,3 +24,11 @@ pub async fn add_batch(
     Ok(StatusCode::CREATED)
 }
 
+
+pub async fn reserve_inventories(
+    State(inventory_manager): State<InventoryManager>,
+    ValidatedJson(data): ValidatedJson<ReserveInventories>,
+) -> Result<Json<ReserveInventoriesResult>, AppError> {
+    let result = inventory_manager.reserve_inventories(data).await?;
+    Ok(Json(result))
+}

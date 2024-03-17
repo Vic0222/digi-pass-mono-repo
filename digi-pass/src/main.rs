@@ -102,8 +102,8 @@ async fn main() {
     let event_repository = Box::new(MongoDbEventRepository::new(client.clone(), database.clone()));
     let event_manager = EventManager::new(event_repository);
 
-    let inventory_repository = Box::new(MongoDbInventoryRepository::new(client.clone(), database.clone()));
-    let inventory_manager = InventoryManager::new(inventory_repository);
+    let inventory_repository = Box::new(MongoDbInventoryRepository::new(client.clone(), database.clone(), "Inventories".to_string()));
+    let inventory_manager = InventoryManager::new(inventory_repository, event_manager.clone());
     let state = AppState {
         event_manager,
         inventory_manager,
@@ -126,6 +126,10 @@ async fn main() {
         .route(
             "/inventories/batch",
             post(self::inventories::inventories_controller::add_batch),
+        )
+        .route(
+            "/inventories/reserve",
+            post(self::inventories::inventories_controller::reserve_inventories),
         )
         .layer(jwt_auth.into_layer())
         

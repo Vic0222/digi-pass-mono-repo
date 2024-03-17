@@ -12,6 +12,7 @@ Content-Type: application/json
 ###
 POST {{baseUrl}}/events
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
     "name" : "Test Event 13123",
@@ -20,6 +21,9 @@ Content-Type: application/json
     "start_date_time": "2024-04-22T18:25:43.511Z",
     "end_date_time": "2024-04-23T18:25:43.511Z"
 }
+
+
+
 #######################################
 #Invalid request
 POST {{baseUrl}}/events
@@ -45,10 +49,11 @@ x-api-key: eMmTHHarRlwJs5BOrUcy6YyumhsFvZZ2fTO7WnE6
 POST {{baseUrl}}/inventories/generate
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
+x-api-key: {{api_key}}
 
 {
     "event_id" : "65e570869825fdfdf094d34d",
-    "number_to_create": 1200
+    "number_to_create": 3434
 }
 
 ###
@@ -60,4 +65,15 @@ Content-Type: application/json
     "event_id" : "65e7d1c90d0410b63c1c051a",
     "quantity" : 10,
     "generate_inventory_id" : "65ead4ccc38bf6df0f99213b"
+}
+
+
+###
+POST {{baseUrl}}/inventories/reserve
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "event_id" : "65e7d1c90d0410b63c1c051a",
+    "quantity" : 10
 }

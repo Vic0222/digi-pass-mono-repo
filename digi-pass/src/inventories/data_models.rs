@@ -9,19 +9,21 @@ pub struct Inventory {
     pub event_id: ObjectId,
     pub status: String,
     #[serde(with = "bson::serde_helpers::chrono_datetime_as_bson_datetime")]
-    pub last_status_change: chrono::DateTime<Utc>,
+    pub last_reservation: chrono::DateTime<Utc>,
     pub generate_inventory_id: Option<ObjectId>,
+    pub concurrency_stamp: String,
 }
 
 
 impl Inventory {
-    pub fn new(event_id: ObjectId, status: String, last_status_change: chrono::DateTime<Utc>, generate_inventory_id: Option<ObjectId>) -> Self {
+    pub fn new(event_id: ObjectId, status: String, last_status_change: chrono::DateTime<Utc>, generate_inventory_id: Option<ObjectId>, concurrency_stamp: String) -> Self {
         Self {
             id: None,
             event_id,
             status,
-            last_status_change,
+            last_reservation: last_status_change,
             generate_inventory_id,
+            concurrency_stamp
         }
     }
 }

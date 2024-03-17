@@ -26,5 +26,15 @@ pub struct CreateInventoryBatch {
     pub generate_inventory_id: Option<String>,
 }
 
+#[derive(Serialize, Deserialize, Validate, Debug)]
+pub struct ReserveInventories {
+    #[validate(length(min = 1))]
+    pub event_id: String,
+    #[validate(range(min = 1, max = 10))]
+    pub quantity: i64,
+}
 
-
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ReserveInventoriesResult {
+    pub reserved_inventories: Vec<String>,
+}
