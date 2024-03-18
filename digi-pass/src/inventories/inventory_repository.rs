@@ -70,7 +70,7 @@ impl InventoryRepository for MongoDbInventoryRepository {
         let inventory_collection = self.get_inventory_collection();
         let find_options = FindOptions::builder().limit(Some(quantity)).build();
 
-        let mut docs = inventory_collection.find(doc!{"event_id": ObjectId::from_str(&event_id)?, "last_reservation": {"$lt": cut_off}}, find_options).await?;
+        let mut docs = inventory_collection.find(doc!{"event_id": ObjectId::from_str(&event_id)?, "last_reservation": doc! { "$lt": cut_off } }, find_options).await?;
         let mut inventories: Vec<Inventory> = vec![];
         while docs.advance().await? {
             inventories.push(docs.deserialize_current()?)
