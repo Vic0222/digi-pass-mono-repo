@@ -57,14 +57,13 @@ x-api-key: {{api_key}}
 }
 
 ###
-POST http://localhost:3000/inventories/batch
+POST {{baseUrl}}/inventories/batch
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-    "event_id" : "65e7d1c90d0410b63c1c051a",
-    "quantity" : 10,
-    "generate_inventory_id" : "65ead4ccc38bf6df0f99213b"
+    "event_id" : "65f7220e9055c6f3d22ab77f",
+    "quantity" : 10
 }
 
 
@@ -72,8 +71,9 @@ Content-Type: application/json
 POST {{baseUrl}}/inventories/reserve
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
+x-api-key: {{api_key}}
 
 {
-    "event_id" : "65e7d1c90d0410b63c1c051a",
-    "quantity" : 10
+    "event_id" : "65f7220e9055c6f3d22ab77f",
+    "quantity" : 5
 }
