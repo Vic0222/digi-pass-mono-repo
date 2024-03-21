@@ -40,6 +40,7 @@ fn map_event(data: CreateEvent) -> Event {
     Event {
         id: None,
         name: data.name,
+        price: data.price,
         start_sale_date_time: data.start_sale_date_time,
         end_sale_date_time: data.end_sale_date_time,
         start_date_time: data.start_date_time,
@@ -57,6 +58,7 @@ mod tests {
         let now = Utc::now();
         let create_event_data = CreateEvent {
             name: "Test Event".to_string(),
+            price: 0,
             start_sale_date_time: now,
             end_sale_date_time: now,
             start_date_time: now,

@@ -10,6 +10,8 @@ use super::data_models::Event;
 pub struct  CreateEvent {
     #[validate(length(min = 1))]
     pub name: String,
+    #[validate(range(min = 0))]
+    pub price: i32,
     pub start_sale_date_time: DateTime<Utc>,
     pub end_sale_date_time: DateTime<Utc>,
     pub start_date_time: DateTime<Utc>,
@@ -75,6 +77,7 @@ mod validate_create_event_tests {
     fn test_validation_fails_on_empty_name() {
         let create_event = CreateEvent {
             name: "".to_string(),
+            price: 0,
             start_sale_date_time: helpers::get_current_time(),
             end_sale_date_time: helpers::get_current_time(),
             start_date_time: helpers::get_current_time(),
@@ -88,6 +91,7 @@ mod validate_create_event_tests {
     fn test_validation_fails_on_start_sale_after_end_sale() {
         let create_event = CreateEvent {
             name: "Event".to_string(),
+            price: 0,
             start_sale_date_time: helpers::get_current_time(),
             end_sale_date_time: helpers::get_current_time() - Duration::days(1),
             start_date_time: helpers::get_current_time(),
@@ -101,6 +105,7 @@ mod validate_create_event_tests {
     fn test_validation_fails_on_start_before_start_sale() {
         let create_event = CreateEvent {
             name: "Event".to_string(),
+            price: 0,
             start_sale_date_time: helpers::get_current_time() + Duration::days(1),
             end_sale_date_time: helpers::get_current_time() + Duration::days(2),
             start_date_time: helpers::get_current_time(),
@@ -114,6 +119,7 @@ mod validate_create_event_tests {
     fn test_validation_fails_on_start_in_the_past() {
         let create_event = CreateEvent {
             name: "Event".to_string(),
+            price: 0,
             start_sale_date_time: helpers::get_current_time() - Duration::days(1),
             end_sale_date_time: helpers::get_current_time(),
             start_date_time: helpers::get_current_time() - Duration::days(2),
@@ -127,6 +133,7 @@ mod validate_create_event_tests {
     fn test_validation_passes_on_valid_create_event() {
         let create_event = CreateEvent {
             name: "Event".to_string(),
+            price: 0,
             start_sale_date_time: helpers::get_current_time() - Duration::days(1),
             end_sale_date_time: helpers::get_current_time(),
             start_date_time: helpers::get_current_time() + Duration::days(1),

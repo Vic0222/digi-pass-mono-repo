@@ -2,6 +2,7 @@ mod events;
 mod inventories;
 mod app_state;
 mod validation;
+mod baskets;
 pub mod helpers;
 
 use std::env;

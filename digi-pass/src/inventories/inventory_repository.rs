@@ -1,5 +1,7 @@
 use std::str::FromStr;
 
+use crate::inventories::constants::INVENTORY_STATUS_AVAILABLE;
+
 use super::data_models::{GenerateInventory, Inventory};
 use async_trait::async_trait;
 use bson::{doc, oid::ObjectId};
@@ -12,7 +14,7 @@ use futures_util::FutureExt;
 pub trait InventoryRepository : DynClone + Send + Sync{
     async fn add_batch(&self, inventories: Vec<Inventory>) -> anyhow::Result<()>;
     async fn add_generate_inventory(&self, generate_inventory: &GenerateInventory) -> anyhow::Result<String>;
-    async fn get_unreserved_inventories(&self, event_id: String, quantity: i64, cut_off: chrono::DateTime<chrono::Utc>) -> anyhow::Result<Vec<Inventory>>;
+    async fn get_unreserved_inventories(&self, event_id: String, quantity: i32, cut_off: chrono::DateTime<chrono::Utc>) -> anyhow::Result<Vec<Inventory>>;
     async fn batch_update_reservations(&self, inventories: &Vec<Inventory>) -> anyhow::Result<()>;
 }
 
@@ -65,12 +67,12 @@ impl InventoryRepository for MongoDbInventoryRepository {
         Ok(())
     }
     
-    async fn get_unreserved_inventories(&self, event_id: String, quantity: i64, cut_off: chrono::DateTime<chrono::Utc>) -> anyhow::Result<Vec<Inventory>>{
+    async fn get_unreserved_inventories(&self, event_id: String, quantity: i32, cut_off: chrono::DateTime<chrono::Utc>) -> anyhow::Result<Vec<Inventory>>{
         
         let inventory_collection = self.get_inventory_collection();
-        let find_options = FindOptions::builder().limit(Some(quantity)).build();
+        let find_options = FindOptions::builder().limit(i64::try_from(quantity).ok()).build();
 
-        let mut docs = inventory_collection.find(doc!{"event_id": ObjectId::from_str(&event_id)?, "last_reservation": doc! { "$lt": cut_off } }, find_options).await?;
+        let mut docs = inventory_collection.find(doc!{"event_id": ObjectId::from_str(&event_id)?, "status": INVENTORY_STATUS_AVAILABLE, "reserved_until": doc! { "$lt": cut_off } }, find_options).await?;
         let mut inventories: Vec<Inventory> = vec![];
         while docs.advance().await? {
             inventories.push(docs.deserialize_current()?)
@@ -101,7 +103,7 @@ async fn batch_update_reservations_internal(session: &mut ClientSession, context
         inventory_collection
             .find_one_and_update_with_session(
                 doc! {"_id": &inventory.id, "concurrency_stamp":&inventory.concurrency_stamp },
-                doc! {"$set": {"last_reservation": inventory.last_reservation, "concurrency_stamp": ObjectId::new().to_hex()}},
+                doc! {"$set": {"last_reservation": inventory.reserved_until, "concurrency_stamp": ObjectId::new().to_hex()}},
                 None,
                 session
             )

@@ -8,6 +8,7 @@ pub struct Event {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     pub id: Option<ObjectId>,
     pub name: String,
+    pub price: i32,
     #[serde(with = "bson::serde_helpers::chrono_datetime_as_bson_datetime")]
     pub start_sale_date_time: chrono::DateTime<Utc>,
     #[serde(with = "bson::serde_helpers::chrono_datetime_as_bson_datetime")]

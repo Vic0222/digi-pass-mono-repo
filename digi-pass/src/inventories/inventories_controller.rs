@@ -29,6 +29,6 @@ pub async fn reserve_inventories(
     State(inventory_manager): State<InventoryManager>,
     ValidatedJson(data): ValidatedJson<ReserveInventories>,
 ) -> Result<Json<ReserveInventoriesResult>, AppError> {
-    let result = inventory_manager.reserve_inventories(data).await?;
+    let result = inventory_manager.reserve_inventories(&data).await?;
     Ok(Json(result))
 }

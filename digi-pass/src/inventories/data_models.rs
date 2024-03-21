@@ -9,7 +9,7 @@ pub struct Inventory {
     pub event_id: ObjectId,
     pub status: String,
     #[serde(with = "bson::serde_helpers::chrono_datetime_as_bson_datetime")]
-    pub last_reservation: chrono::DateTime<Utc>,
+    pub reserved_until: chrono::DateTime<Utc>,
     pub generate_inventory_id: Option<ObjectId>,
     pub concurrency_stamp: String,
 }
@@ -21,7 +21,7 @@ impl Inventory {
             id: None,
             event_id,
             status,
-            last_reservation: last_status_change,
+            reserved_until: last_status_change,
             generate_inventory_id,
             concurrency_stamp
         }

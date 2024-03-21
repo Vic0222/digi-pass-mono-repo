@@ -1,3 +1,4 @@
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
@@ -31,10 +32,27 @@ pub struct ReserveInventories {
     #[validate(length(min = 1))]
     pub event_id: String,
     #[validate(range(min = 1, max = 10))]
-    pub quantity: i64,
+    pub quantity: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ReserveInventoriesResult {
-    pub reserved_inventories: Vec<String>,
+    pub reserved_inventories: Vec<ReservedInventory>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ReservedInventory{
+    pub inventory_id: String,
+    pub reserved_until: chrono::DateTime<Utc>,
+}
+
+impl  ReservedInventory {
+    
+    pub fn new(inventory_id: String, reserved_until: chrono::DateTime<Utc>) -> Self {
+        ReservedInventory {
+            inventory_id,
+            reserved_until,
+        }
+    }
+
 }
