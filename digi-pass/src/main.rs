@@ -20,7 +20,7 @@ use tower_http::trace::{self, TraceLayer};
 use tracing::Level;
 use tracing_subscriber::EnvFilter;
 
-use crate::{app_state::AppState, events::{event_manager::EventManager, event_repository::MongoDbEventRepository}, inventories::{inventory_manager::InventoryManager, inventory_repository::MongoDbInventoryRepository}};
+use crate::{app_state::AppState, baskets::{basket_manager::BasketManager, basket_repository::MongoDbBasketRepository}, events::{event_manager::EventManager, event_repository::MongoDbEventRepository}, inventories::{inventory_manager::InventoryManager, inventory_repository::MongoDbInventoryRepository}};
 
 use jwt_authorizer::{JwtAuthorizer, Validation};
 use jwt_authorizer::{Authorizer, IntoLayer};
@@ -105,9 +105,13 @@ async fn main() {
 
     let inventory_repository = Box::new(MongoDbInventoryRepository::new(client.clone(), database.clone(), "Inventories".to_string()));
     let inventory_manager = InventoryManager::new(inventory_repository, event_manager.clone());
+
+    let basket_repository = Box::new(MongoDbBasketRepository::new(client.clone(), database.clone(), "Baskets".to_string()));
+    let basket_manager = BasketManager::new(inventory_manager.clone(), basket_repository, event_manager.clone());
     let state = AppState {
         event_manager,
         inventory_manager,
+        basket_manager
     };
     
     // build our application with a route
@@ -131,6 +135,10 @@ async fn main() {
         .route(
             "/inventories/reserve",
             post(self::inventories::inventories_controller::reserve_inventories),
+        )
+        .route(
+            "/basket",
+            post(self::baskets::basket_controller::create),
         )
         .layer(jwt_auth.into_layer())
         

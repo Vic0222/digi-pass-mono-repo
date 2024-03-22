@@ -1,1 +1,6 @@
 Add idempotency for create endoints
+Add proper error handling
+- 400 if expected
+- 500 if not
+
+Add authorization by scope

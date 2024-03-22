@@ -14,7 +14,7 @@ pub trait EventRepository : DynClone + Send + Sync  {
 
     async fn list(&self) -> anyhow::Result<Vec<Event>>;
 
-    async fn get_event(&self, event_id: String) -> anyhow::Result<Option<Event>>;
+    async fn get_event(&self, event_id: &String) -> anyhow::Result<Option<Event>>;
 }
 
 dyn_clone::clone_trait_object!(EventRepository);
@@ -67,7 +67,7 @@ impl EventRepository for MongoDbEventRepository{
         Ok(events)
     }
 
-    async fn get_event(&self, event_id: String) -> anyhow::Result<Option<Event>>{
+    async fn get_event(&self, event_id: &String) -> anyhow::Result<Option<Event>>{
         tracing::info!("Getting event {}", event_id);
         let event_collection = self.get_collection();
         let event = event_collection.find_one(doc! {"_id":ObjectId::from_str(&event_id)? }, None).await?;

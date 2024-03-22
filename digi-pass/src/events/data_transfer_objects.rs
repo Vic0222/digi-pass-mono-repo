@@ -43,6 +43,7 @@ pub struct CreateEventResult {
 pub struct  EventDetails {
     pub id: String,
     pub name: String,
+    pub price: i32,
     pub start_sale_date_time: DateTime<Utc>,
     pub end_sale_date_time: DateTime<Utc>,
     pub start_date_time: DateTime<Utc>,
@@ -58,6 +59,7 @@ impl  From<&Event> for EventDetails {
         EventDetails {
             id: id,
             name: value.name.clone(),
+            price: value.price,
             start_sale_date_time: value.start_sale_date_time,
             end_sale_date_time: value.end_sale_date_time,
             start_date_time: value.start_date_time,

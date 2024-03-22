@@ -31,8 +31,10 @@ impl EventManager {
         Ok(events)
     }
 
-    pub async fn get_event(&self, event_id: String) -> anyhow::Result<Option<Event>> {
-        self.event_repository.get_event(event_id).await
+    pub async fn get_event(&self, event_id: &String) -> anyhow::Result<Option<EventDetails>> {
+        let event_details = self.event_repository.get_event(event_id).await?
+            .and_then(|event| Some((&event).into()));
+        Ok(event_details)
     }
 }
 

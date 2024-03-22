@@ -2,18 +2,20 @@
 
 use chrono::Utc;
 
-use crate::inventories::{data_transfer_objects::ReserveInventories, inventory_manager::InventoryManager};
+use crate::{events::{data_transfer_objects::EventDetails, event_manager::EventManager}, inventories::{data_transfer_objects::{ReserveInventories, ReservedInventory}, inventory_manager::InventoryManager}};
 
 use super::{basket_repository::BasketRepository, data_models::{Basket, BasketItem, BasketedInventory}, data_transfer_objects::{AddBasketItemRequest, CreateBasketRequest, CreateBasketResult}};
 
+#[derive(Clone)]
 pub struct  BasketManager {
     inventory_manager: InventoryManager,
+    event_manager: EventManager,
     basket_repository: Box<dyn BasketRepository>,
 }
 
 impl BasketManager {
-    pub fn new(inventory_manager: InventoryManager, basket_repository: Box<dyn BasketRepository>) -> Self {
-        Self {inventory_manager, basket_repository}
+    pub fn new(inventory_manager: InventoryManager, basket_repository: Box<dyn BasketRepository>, event_manager: EventManager) -> Self {
+        Self {inventory_manager, basket_repository, event_manager}
     }
 
     pub async fn create_basket(&self, create_basket_request: CreateBasketRequest) -> anyhow::Result<CreateBasketResult> {
@@ -22,6 +24,11 @@ impl BasketManager {
         
         let mut basket_items: Vec<BasketItem> = vec![];
         for inventory_request in inventory_requests {
+
+            let event = self.event_manager.get_event(&inventory_request.event_id).await?
+                .ok_or(anyhow::anyhow!("Event not found: {:?}", inventory_request.event_id.clone()))?;
+           
+           
             let result =self.inventory_manager.reserve_inventories(&inventory_request).await?;
             if result.reserved_inventories.len() != inventory_request.quantity as usize {
                 return Err(anyhow::anyhow!("Not enough inventories: {:?}", result.reserved_inventories.len()));
@@ -29,9 +36,10 @@ impl BasketManager {
 
             let basket_item = BasketItem { 
                 basketed_inventories: result.reserved_inventories.iter()
-                    .map(|ri| 
-                        BasketedInventory::new(inventory_request.event_id.clone(), ri.inventory_id.to_string(), ri.reserved_until))
-                    .collect() };
+                .map(|ri| 
+                    create_basketed_inventory(&event, ri))
+                .collect() 
+            };
 
             basket_items.push(basket_item);
         }
@@ -43,6 +51,10 @@ impl BasketManager {
         Ok(CreateBasketResult{ basket_id : basket_id.ok_or(anyhow::anyhow!("Failed creating basket"))? })
     }
     
+}
+
+fn create_basketed_inventory(event: &EventDetails, reserved_inventory: &ReservedInventory) -> BasketedInventory {
+    BasketedInventory::new(event.id.clone(), reserved_inventory.inventory_id.to_string(), reserved_inventory.reserved_until, event.price)
 }
 
 fn generate_reserve_inventory_request(add_basket_item_requests: &Vec<AddBasketItemRequest>) -> Vec<ReserveInventories> {

@@ -50,7 +50,7 @@ impl InventoryManager {
     }
 
     pub async fn reserve_inventories(&self, reserve_inventories: &ReserveInventories) -> anyhow::Result<ReserveInventoriesResult> {
-        let _event = self.event_manager.get_event(reserve_inventories.event_id.clone()).await?.ok_or(anyhow::anyhow!("Event not found"))?;
+        let _event = self.event_manager.get_event(&reserve_inventories.event_id).await?.ok_or(anyhow::anyhow!("Event not found"))?;
         
         let now = Utc::now();
         let reserved_until = now + chrono::Duration::minutes(30);

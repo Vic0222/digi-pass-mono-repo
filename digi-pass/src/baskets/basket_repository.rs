@@ -1,7 +1,6 @@
 use axum::async_trait;
 use dyn_clone::DynClone;
-use mongodb::{bson, options::FindOptions, Client, Database};
-use serde::{Deserialize, Serialize};
+use mongodb::{Client, Collection};
 use super::data_models::Basket;
 
 
@@ -15,17 +14,23 @@ dyn_clone::clone_trait_object!(BasketRepository);
 #[derive(Clone)]
 pub struct  MongoDbBasketRepository {
     pub client: Client,
-    pub database: Database,
+    pub database: String,
     pub collection: String,
 }
 
 impl MongoDbBasketRepository {
-    pub fn new(client: Client, database: Database, collection: String) -> Self {
+    pub fn new(client: Client, database: String, collection: String) -> Self {
         MongoDbBasketRepository {
             client,
             database,
             collection
         }
+    }
+
+    fn get_collection(&self) -> Collection<Basket> {
+        let database = self.client.database(&self.database[..]);
+        let event_collection: Collection<Basket> = database.collection(&self.collection);
+        event_collection
     }
     
 }
@@ -34,7 +39,7 @@ impl MongoDbBasketRepository {
 impl BasketRepository for MongoDbBasketRepository{
     async fn add(&self, basket: Basket) -> anyhow::Result<Option<String>>{
 
-        let collection = self.database.collection::<Basket>(&self.collection);
+        let collection = self.get_collection();
         let result = collection.insert_one(basket, None).await?;
         Ok(result.inserted_id.as_object_id().and_then(|oid| Some(oid.to_hex()) ))
     }

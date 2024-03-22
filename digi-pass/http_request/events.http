@@ -9,13 +9,15 @@ Content-Type: application/json
 "grant_type":"client_credentials"}
 
 
-###
+###  
+# @name create_event
 POST {{baseUrl}}/events
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-    "name" : "Test Event 13123",
+    "name" : "Test Event 2323",
+    "price" : 25000,
     "start_sale_date_time": "2024-03-23T18:25:43.511Z",
     "end_sale_date_time": "2024-04-23T18:25:43.511Z",
     "start_date_time": "2024-04-22T18:25:43.511Z",
@@ -40,6 +42,9 @@ Content-Type: application/json
 #########################################
 
 @authToken = {{login.response.body.$.access_token}}
+@event_id = {{create_event.response.body.$.id}}
+
+
 # @name GetEvents
 GET {{baseUrl}}/events
 Authorization: Bearer {{authToken}}
@@ -62,8 +67,8 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-    "event_id" : "65f7220e9055c6f3d22ab77f",
-    "quantity" : 10
+    "event_id" : "{{event_id}}",
+    "quantity" : 1000
 }
 
 
@@ -76,4 +81,20 @@ x-api-key: {{api_key}}
 {
     "event_id" : "65f7220e9055c6f3d22ab77f",
     "quantity" : 5
+}
+
+
+###
+POST {{baseUrl}}/basket
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+x-api-key: {{api_key}}
+
+{
+    "add_basket_item_request" : [
+        {
+            "event_id" : "65f7220e9055c6f3d22ab77f",
+            "quantity": 5
+        }
+    ]
 }
