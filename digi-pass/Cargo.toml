@@ -19,6 +19,7 @@ futures-util = "0.3.30"
 jwt-authorizer = { version = "0.14.0", features = ["native-tls-vendored"] }
 lambda_http = "0.10.0"
 mongodb = "2.8.1"
+reqwest = { version = "0.12.1", features = ["native-tls-vendored", "json"] }
 serde = { version = "1.0.197", features = ["derive"] }
 serde_json = "1.0.114"
 thiserror = "1.0.57"

@@ -1,4 +1,7 @@
+use std::str::FromStr;
+
 use axum::async_trait;
+use bson::oid::ObjectId;
 use dyn_clone::DynClone;
 use mongodb::{Client, Collection};
 use super::data_models::Basket;
@@ -7,6 +10,7 @@ use super::data_models::Basket;
 #[async_trait]
 pub trait BasketRepository : DynClone + Send + Sync  {
     async fn add(&self, basket: Basket) -> anyhow::Result<Option<String>>;
+    async fn get (&self, id: &String) -> anyhow::Result<Option<Basket>>;
 }
 
 dyn_clone::clone_trait_object!(BasketRepository);
@@ -42,5 +46,12 @@ impl BasketRepository for MongoDbBasketRepository{
         let collection = self.get_collection();
         let result = collection.insert_one(basket, None).await?;
         Ok(result.inserted_id.as_object_id().and_then(|oid| Some(oid.to_hex()) ))
+    }
+
+    async fn get (&self, id: &String) -> anyhow::Result<Option<Basket>> {
+        let collection = self.get_collection();
+        let filter = mongodb::bson::doc! {"_id": ObjectId::from_str(&id)? };
+        let result = collection.find_one(filter, None).await?;
+        Ok(result)
     }
 }

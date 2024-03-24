@@ -93,7 +93,7 @@ x-api-key: {{api_key}}
 {
     "add_basket_item_request" : [
         {
-            "event_id" : "65f7220e9055c6f3d22ab77f",
+            "event_id" : "{{event_id}}",
             "quantity": 5
         }
     ]

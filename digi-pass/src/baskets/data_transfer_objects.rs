@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
@@ -17,4 +18,23 @@ pub struct AddBasketItemRequest {
 #[derive(Serialize)]
 pub struct CreateBasketResult {
     pub basket_id: String,
+}
+
+#[derive(Serialize)]
+pub struct Basket {
+    pub id: String,
+    pub basket_items: Vec<BasketItem>,
+}
+
+#[derive(Serialize)]
+pub struct BasketItem{
+    pub basketed_inventories: Vec<BasketedInventory>
+}
+
+#[derive(Serialize)]
+pub struct BasketedInventory{
+    pub event_id: String,
+    pub inventory_id: String,
+    pub reserved_until: DateTime<Utc>,
+    pub price: i32,
 }

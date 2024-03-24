@@ -3,6 +3,7 @@ mod inventories;
 mod app_state;
 mod validation;
 mod baskets;
+mod payments;
 pub mod helpers;
 
 use std::env;

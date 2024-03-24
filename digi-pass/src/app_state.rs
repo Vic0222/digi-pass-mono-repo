@@ -1,6 +1,6 @@
 use axum::extract::FromRef;
 
-use crate::{baskets::application::BasketService, events::application::EventService, inventories::application::InventoryService};
+use crate::{baskets::application::BasketService, events::application::EventService, inventories::application::InventoryService, payments::application::PaymentService};
 #[derive(FromRef,Clone)]
 pub struct AppState {
     pub event_service: EventService,

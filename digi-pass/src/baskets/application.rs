@@ -1,9 +1,10 @@
+use chrono::Utc;
 use mongodb::Client;
 
 use crate::inventories::{data_transfer_objects::{ReserveInventories, ReservedInventory}, application::InventoryService};
 use crate::events::{application::EventService, data_transfer_objects::EventDetails};
 
-use super::{basket_repository::{BasketRepository, MongoDbBasketRepository}, data_models::{Basket, BasketItem, BasketedInventory}, data_transfer_objects::{AddBasketItemRequest, CreateBasketRequest, CreateBasketResult}};
+use super::{basket_repository::{BasketRepository, MongoDbBasketRepository}, data_models::{self, Basket, BasketItem, BasketedInventory}, data_transfer_objects::{self, AddBasketItemRequest, CreateBasketRequest, CreateBasketResult}};
 
 #[derive(Clone)]
 pub struct  BasketService {
@@ -45,13 +46,63 @@ impl BasketService {
         }
             
         //create and save basket
-        let basket = Basket{  basket_items};
+        let basket = Basket::new(basket_items);
         let basket_id = self.basket_repository.add(basket).await?;
         
         Ok(CreateBasketResult{ basket_id : basket_id.ok_or(anyhow::anyhow!("Failed creating basket"))? })
     }
+
+    pub async fn get_valid_basket(&self, basket_id: &String) -> anyhow::Result<Option<data_transfer_objects::Basket>> {
+        let basket = self.basket_repository.get(&basket_id).await?;
+        
+        match  basket {
+            None => Ok(None),
+            Some(basket) => {
+                if !is_all_inventory_reserved(&basket) {
+                    return Ok(None);
+                }
+                Ok(Some(map_dto_basket_to_data_basket(&basket)?))
+            }
+        }
+    }
+    
     
 }
+
+
+fn map_dto_basket_to_data_basket(data_basket: &data_models::Basket) -> anyhow::Result<data_transfer_objects::Basket>{
+    
+    let dto_basket = data_transfer_objects::Basket {
+        id: data_basket.id.and_then(|id| Some(id.to_hex())).ok_or(anyhow::anyhow!("No basket id!"))?,
+        basket_items: data_basket.basket_items.iter().map(|basket_item| {
+            data_transfer_objects::BasketItem {
+                basketed_inventories: basket_item.basketed_inventories.iter().map(|basketed_inventory| {
+                    data_transfer_objects::BasketedInventory {
+                        event_id: basketed_inventory.event_id.clone(),
+                        inventory_id: basketed_inventory.inventory_id.clone(),
+                        reserved_until: basketed_inventory.reserved_until,
+                        price: basketed_inventory.price
+                    }
+                }).collect()
+            }
+        }).collect()
+    };
+    Ok(dto_basket)
+}
+
+
+fn is_all_inventory_reserved(basket: &Basket) -> bool {
+    for basket_item in basket.basket_items.iter() {
+        for basketed_inventory in basket_item.basketed_inventories.iter() {
+            if basketed_inventory.reserved_until < Utc::now() {
+                return false;
+            }
+        }
+    }
+    true
+}
+
+
 
 fn create_basketed_inventory(event: &EventDetails, reserved_inventory: &ReservedInventory) -> BasketedInventory {
     BasketedInventory::new(event.id.clone(), reserved_inventory.inventory_id.to_string(), reserved_inventory.reserved_until, event.price)
@@ -92,6 +143,7 @@ mod tests {
 
     
 }
+
 
 
 
