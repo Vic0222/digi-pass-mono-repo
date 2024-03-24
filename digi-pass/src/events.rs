@@ -1,5 +1,5 @@
-pub mod events_controller;
+mod data_models;
+mod event_repository;
+pub mod application; 
 pub mod data_transfer_objects;
-pub mod data_models;
-pub mod event_repository;
-pub mod event_manager;
+pub mod events_controller;

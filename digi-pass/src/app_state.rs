@@ -1,9 +1,9 @@
 use axum::extract::FromRef;
 
-use crate::{baskets::basket_manager::BasketManager, events::event_manager::EventManager, inventories::inventory_manager::InventoryManager};
+use crate::{baskets::application::BasketService, events::application::EventService, inventories::application::InventoryService};
 #[derive(FromRef,Clone)]
 pub struct AppState {
-    pub event_manager: EventManager,
-    pub inventory_manager: InventoryManager,
-    pub basket_manager: BasketManager,
+    pub event_service: EventService,
+    pub inventory_service: InventoryService,
+    pub basket_service: BasketService,
 }

@@ -1,17 +1,18 @@
+use mongodb::Client;
+
 use super::{
-    data_models::Event, data_transfer_objects::{CreateEvent, CreateEventResult, EventDetails}, event_repository::EventRepository
+    data_models::Event, data_transfer_objects::{CreateEvent, CreateEventResult, EventDetails}, event_repository::{EventRepository, MongoDbEventRepository}
 };
 
 #[derive(Clone)]
-pub struct EventManager {
-    pub event_repository: Box<dyn EventRepository>,
+pub struct EventService {
+    event_repository: Box<dyn EventRepository>,
 }
 
-impl EventManager {
-
-
-    pub fn new(event_repository: Box<dyn EventRepository + Send + Sync>) -> Self {
-        EventManager {
+impl EventService {
+    pub fn new(client: Client, database: String) -> Self {
+        let event_repository = Box::new(MongoDbEventRepository::new(client, database));
+        EventService {
             event_repository: event_repository,
         }
     }

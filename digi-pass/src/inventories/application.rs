@@ -3,8 +3,8 @@ use std::str::FromStr;
 use anyhow::Ok;
 use bson::oid::ObjectId;
 use chrono::Utc;
-
-use crate::events::event_manager::EventManager;
+use mongodb::Client;
+use crate::events::application::EventService;
 
 use super::constants::{GENERATE_INVENTORY_STATUS_PENDING, INVENTORY_STATUS_AVAILABLE};
 use super::data_models::{GenerateInventory, Inventory};
@@ -12,19 +12,21 @@ use super::data_transfer_objects::{
     CreateInventoryBatch, GenerateInventory as GenerateInventoryDto,
     GenerateInventoryResult, ReserveInventories, ReserveInventoriesResult, ReservedInventory,
 };
-use super::inventory_repository::InventoryRepository;
+use super::inventory_repository::{InventoryRepository, MongoDbInventoryRepository};
 
 #[derive(Clone)]
-pub struct InventoryManager {
+pub struct InventoryService {
     pub inventory_repository: Box<dyn InventoryRepository>,
-    pub event_manager: EventManager,
+    pub event_service: EventService,
 }
 
-impl InventoryManager {
-    pub fn new(inventory_repository: Box<dyn InventoryRepository>, event_manager: EventManager) -> Self {
-        InventoryManager {
+impl InventoryService {
+
+    pub fn new(client: Client, database: String, event_service: EventService) -> Self {
+        let inventory_repository = Box::new(MongoDbInventoryRepository::new(client, database, "Inventories".to_string()));
+        InventoryService {
             inventory_repository,
-            event_manager
+            event_service
         }
     }
 
@@ -50,7 +52,7 @@ impl InventoryManager {
     }
 
     pub async fn reserve_inventories(&self, reserve_inventories: &ReserveInventories) -> anyhow::Result<ReserveInventoriesResult> {
-        let _event = self.event_manager.get_event(&reserve_inventories.event_id).await?.ok_or(anyhow::anyhow!("Event not found"))?;
+        let _event = self.event_service.get_event(&reserve_inventories.event_id).await?.ok_or(anyhow::anyhow!("Event not found"))?;
         
         let now = Utc::now();
         let reserved_until = now + chrono::Duration::minutes(30);

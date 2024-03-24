@@ -20,7 +20,10 @@ use tower_http::trace::{self, TraceLayer};
 use tracing::Level;
 use tracing_subscriber::EnvFilter;
 
-use crate::{app_state::AppState, baskets::{basket_manager::BasketManager, basket_repository::MongoDbBasketRepository}, events::{event_manager::EventManager, event_repository::MongoDbEventRepository}, inventories::{inventory_manager::InventoryManager, inventory_repository::MongoDbInventoryRepository}};
+use crate::app_state::AppState;
+use crate::inventories::application::InventoryService;
+use crate::events::application::EventService;
+use crate::baskets::application::BasketService;
 
 use jwt_authorizer::{JwtAuthorizer, Validation};
 use jwt_authorizer::{Authorizer, IntoLayer};
@@ -100,18 +103,17 @@ async fn main() {
         .expect("Failed creating mongodb client");
     
 
-    let event_repository = Box::new(MongoDbEventRepository::new(client.clone(), database.clone()));
-    let event_manager = EventManager::new(event_repository);
+    
+    let event_service = EventService::new(client.clone(), database.clone());
 
-    let inventory_repository = Box::new(MongoDbInventoryRepository::new(client.clone(), database.clone(), "Inventories".to_string()));
-    let inventory_manager = InventoryManager::new(inventory_repository, event_manager.clone());
+    let inventory_service = InventoryService::new(client.clone(), database.clone(), event_service.clone());
 
-    let basket_repository = Box::new(MongoDbBasketRepository::new(client.clone(), database.clone(), "Baskets".to_string()));
-    let basket_manager = BasketManager::new(inventory_manager.clone(), basket_repository, event_manager.clone());
+    let basket_service = BasketService::new(client.clone(), database.clone(), inventory_service.clone(), event_service.clone());
+    
     let state = AppState {
-        event_manager,
-        inventory_manager,
-        basket_manager
+        event_service,
+        inventory_service,
+        basket_service
     };
     
     // build our application with a route

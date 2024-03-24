@@ -1,6 +1,7 @@
-pub mod data_models;
-pub mod constants;
+mod data_models;
+mod inventory_repository;
+
+pub mod application;
 pub mod data_transfer_objects;
-pub mod inventory_repository;
-pub mod inventory_manager;
+pub mod constants;
 pub mod inventories_controller;

@@ -1,21 +1,21 @@
+use mongodb::Client;
 
+use crate::inventories::{data_transfer_objects::{ReserveInventories, ReservedInventory}, application::InventoryService};
+use crate::events::{application::EventService, data_transfer_objects::EventDetails};
 
-use chrono::Utc;
-
-use crate::{events::{data_transfer_objects::EventDetails, event_manager::EventManager}, inventories::{data_transfer_objects::{ReserveInventories, ReservedInventory}, inventory_manager::InventoryManager}};
-
-use super::{basket_repository::BasketRepository, data_models::{Basket, BasketItem, BasketedInventory}, data_transfer_objects::{AddBasketItemRequest, CreateBasketRequest, CreateBasketResult}};
+use super::{basket_repository::{BasketRepository, MongoDbBasketRepository}, data_models::{Basket, BasketItem, BasketedInventory}, data_transfer_objects::{AddBasketItemRequest, CreateBasketRequest, CreateBasketResult}};
 
 #[derive(Clone)]
-pub struct  BasketManager {
-    inventory_manager: InventoryManager,
-    event_manager: EventManager,
+pub struct  BasketService {
+    inventory_service: InventoryService,
+    event_service: EventService,
     basket_repository: Box<dyn BasketRepository>,
 }
 
-impl BasketManager {
-    pub fn new(inventory_manager: InventoryManager, basket_repository: Box<dyn BasketRepository>, event_manager: EventManager) -> Self {
-        Self {inventory_manager, basket_repository, event_manager}
+impl BasketService {
+    pub fn new(client : Client, database: String, inventory_service: InventoryService, event_service: EventService) -> Self {
+        let basket_repository = Box::new(MongoDbBasketRepository::new(client.clone(), database.clone(), "Baskets".to_string()));
+        Self {inventory_service, basket_repository, event_service}
     }
 
     pub async fn create_basket(&self, create_basket_request: CreateBasketRequest) -> anyhow::Result<CreateBasketResult> {
@@ -25,11 +25,11 @@ impl BasketManager {
         let mut basket_items: Vec<BasketItem> = vec![];
         for inventory_request in inventory_requests {
 
-            let event = self.event_manager.get_event(&inventory_request.event_id).await?
+            let event = self.event_service.get_event(&inventory_request.event_id).await?
                 .ok_or(anyhow::anyhow!("Event not found: {:?}", inventory_request.event_id.clone()))?;
            
            
-            let result =self.inventory_manager.reserve_inventories(&inventory_request).await?;
+            let result =self.inventory_service.reserve_inventories(&inventory_request).await?;
             if result.reserved_inventories.len() != inventory_request.quantity as usize {
                 return Err(anyhow::anyhow!("Not enough inventories: {:?}", result.reserved_inventories.len()));
             }
