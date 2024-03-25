@@ -6,4 +6,5 @@ pub struct AppState {
     pub event_service: EventService,
     pub inventory_service: InventoryService,
     pub basket_service: BasketService,
+    pub payment_service: PaymentService,
 }

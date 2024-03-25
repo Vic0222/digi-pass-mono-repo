@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use chrono::Utc;
 use mongodb::Client;
 
@@ -10,12 +12,12 @@ use super::{basket_repository::{BasketRepository, MongoDbBasketRepository}, data
 pub struct  BasketService {
     inventory_service: InventoryService,
     event_service: EventService,
-    basket_repository: Box<dyn BasketRepository>,
+    basket_repository: Arc<dyn BasketRepository>,
 }
 
 impl BasketService {
     pub fn new(client : Client, database: String, inventory_service: InventoryService, event_service: EventService) -> Self {
-        let basket_repository = Box::new(MongoDbBasketRepository::new(client.clone(), database.clone(), "Baskets".to_string()));
+        let basket_repository = Arc::new(MongoDbBasketRepository::new(client.clone(), database.clone(), "Baskets".to_string()));
         Self {inventory_service, basket_repository, event_service}
     }
 

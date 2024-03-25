@@ -21,7 +21,7 @@ use tower_http::trace::{self, TraceLayer};
 use tracing::Level;
 use tracing_subscriber::EnvFilter;
 
-use crate::app_state::AppState;
+use crate::{app_state::AppState, payments::application::PaymentService};
 use crate::inventories::application::InventoryService;
 use crate::events::application::EventService;
 use crate::baskets::application::BasketService;
@@ -102,19 +102,34 @@ async fn main() {
     let client = Client::with_uri_str(connection_string)
         .await
         .expect("Failed creating mongodb client");
-    
 
+    let pay_mongo_base_url = env::var("PayMongo__BaseUrl")
+    .expect("PayMongo base url not found.");
+
+    let pay_mongo_secret_base64 = env::var("PayMongo__SecretKeyBase64")
+    .expect("PayMongo secret key not found.");
+
+    let pay_mongo_payment_method_types = env::var("PayMongo__PaymentMethodTypes")
+    .expect("PayMongo payment method types not found.");
+    
+    let pay_mongo_payment_method_types_list = pay_mongo_payment_method_types
+        .split(",")
+        .map(|s| s.to_string())
+        .collect::<Vec<String>>();
     
     let event_service = EventService::new(client.clone(), database.clone());
 
     let inventory_service = InventoryService::new(client.clone(), database.clone(), event_service.clone());
 
     let basket_service = BasketService::new(client.clone(), database.clone(), inventory_service.clone(), event_service.clone());
+
+    let payment_service = PaymentService::new(basket_service.clone(), inventory_service.clone(), event_service.clone(), pay_mongo_base_url, pay_mongo_secret_base64, pay_mongo_payment_method_types_list );
     
     let state = AppState {
         event_service,
         inventory_service,
-        basket_service
+        basket_service,
+        payment_service
     };
     
     // build our application with a route
@@ -129,19 +144,23 @@ async fn main() {
             get(self::events::events_controller::get),
         ).route(
             "/inventories/generate",
-            post(self::inventories::inventories_controller::generate_async),
+            post(self::inventories::controller::generate_async),
         )
         .route(
             "/inventories/batch",
-            post(self::inventories::inventories_controller::add_batch),
+            post(self::inventories::controller::add_batch),
         )
         .route(
             "/inventories/reserve",
-            post(self::inventories::inventories_controller::reserve_inventories),
+            post(self::inventories::controller::reserve_inventories),
         )
         .route(
-            "/basket",
+            "/baskets",
             post(self::baskets::basket_controller::create),
+        )
+        .route(
+            "/payments/checkout",
+            post(self::payments::controller::checkout),
         )
         .layer(jwt_auth.into_layer())
         

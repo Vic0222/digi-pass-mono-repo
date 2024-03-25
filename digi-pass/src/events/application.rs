@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use mongodb::Client;
 
 use super::{
@@ -6,12 +8,12 @@ use super::{
 
 #[derive(Clone)]
 pub struct EventService {
-    event_repository: Box<dyn EventRepository>,
+    event_repository: Arc<dyn EventRepository>,
 }
 
 impl EventService {
     pub fn new(client: Client, database: String) -> Self {
-        let event_repository = Box::new(MongoDbEventRepository::new(client, database));
+        let event_repository = Arc::new(MongoDbEventRepository::new(client, database));
         EventService {
             event_repository: event_repository,
         }

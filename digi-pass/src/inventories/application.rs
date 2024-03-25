@@ -1,4 +1,5 @@
 use std::str::FromStr;
+use std::sync::Arc;
 
 use anyhow::Ok;
 use bson::oid::ObjectId;
@@ -16,14 +17,14 @@ use super::inventory_repository::{InventoryRepository, MongoDbInventoryRepositor
 
 #[derive(Clone)]
 pub struct InventoryService {
-    pub inventory_repository: Box<dyn InventoryRepository>,
+    pub inventory_repository: Arc<dyn InventoryRepository>,
     pub event_service: EventService,
 }
 
 impl InventoryService {
 
     pub fn new(client: Client, database: String, event_service: EventService) -> Self {
-        let inventory_repository = Box::new(MongoDbInventoryRepository::new(client, database, "Inventories".to_string()));
+        let inventory_repository = Arc::new(MongoDbInventoryRepository::new(client, database, "Inventories".to_string()));
         InventoryService {
             inventory_repository,
             event_service

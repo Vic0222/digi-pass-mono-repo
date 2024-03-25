@@ -4,4 +4,4 @@ mod inventory_repository;
 pub mod application;
 pub mod data_transfer_objects;
 pub mod constants;
-pub mod inventories_controller;
+pub mod controller;

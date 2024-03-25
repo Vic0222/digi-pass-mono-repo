@@ -2,18 +2,16 @@ use std::str::FromStr;
 
 use axum::async_trait;
 use bson::oid::ObjectId;
-use dyn_clone::DynClone;
 use mongodb::{Client, Collection};
 use super::data_models::Basket;
 
 
 #[async_trait]
-pub trait BasketRepository : DynClone + Send + Sync  {
+pub trait BasketRepository : Send + Sync  {
     async fn add(&self, basket: Basket) -> anyhow::Result<Option<String>>;
     async fn get (&self, id: &String) -> anyhow::Result<Option<Basket>>;
 }
 
-dyn_clone::clone_trait_object!(BasketRepository);
 
 #[derive(Clone)]
 pub struct  MongoDbBasketRepository {

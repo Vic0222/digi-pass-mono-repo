@@ -3,22 +3,18 @@ use std::str::FromStr;
 
 use async_trait::async_trait;
 use bson::{doc, oid::ObjectId};
-use dyn_clone::DynClone;
 use mongodb::{options::FindOptions, Client, Collection};
 
 use super::data_models::{self, Event};
 
 #[async_trait]
-pub trait EventRepository : DynClone + Send + Sync  {
+pub trait EventRepository : Send + Sync  {
     async fn add(&self, event: data_models::Event) -> anyhow::Result<String>;
 
     async fn list(&self) -> anyhow::Result<Vec<Event>>;
 
     async fn get_event(&self, event_id: &String) -> anyhow::Result<Option<Event>>;
 }
-
-dyn_clone::clone_trait_object!(EventRepository);
-
 
 #[derive(Clone)]
 pub struct MongoDbEventRepository {

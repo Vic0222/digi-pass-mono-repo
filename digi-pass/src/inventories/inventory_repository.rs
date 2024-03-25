@@ -5,20 +5,18 @@ use crate::inventories::constants::INVENTORY_STATUS_AVAILABLE;
 use super::data_models::{GenerateInventory, Inventory};
 use async_trait::async_trait;
 use bson::{doc, oid::ObjectId};
-use dyn_clone::DynClone;
 use mongodb::{options::FindOptions, Client, ClientSession, Collection};
 use futures_util::FutureExt;
 
 
 #[async_trait]
-pub trait InventoryRepository : DynClone + Send + Sync{
+pub trait InventoryRepository : Send + Sync{
     async fn add_batch(&self, inventories: Vec<Inventory>) -> anyhow::Result<()>;
     async fn add_generate_inventory(&self, generate_inventory: &GenerateInventory) -> anyhow::Result<String>;
     async fn get_unreserved_inventories(&self, event_id: String, quantity: i32, cut_off: chrono::DateTime<chrono::Utc>) -> anyhow::Result<Vec<Inventory>>;
     async fn batch_update_reservations(&self, inventories: &Vec<Inventory>) -> anyhow::Result<()>;
 }
 
-dyn_clone::clone_trait_object!(InventoryRepository);
 
 #[derive(Clone)]
 pub struct MongoDbInventoryRepository {
