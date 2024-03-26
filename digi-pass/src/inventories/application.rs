@@ -68,7 +68,7 @@ impl InventoryService {
         Ok(ReserveInventoriesResult {
             reserved_inventories : inventories.iter()
                 .filter_map(|inventory|  
-                    inventory.id.and_then(|id| Some(ReservedInventory::new(id.to_hex(), inventory.reserved_until))) )
+                    inventory.id.map(|id| ReservedInventory::new(id.to_hex(), inventory.reserved_until)) )
                 .collect()
         })
     }
@@ -95,13 +95,12 @@ pub fn map_create_inventory_to_inventories(
         .and_then(|gii| ObjectId::from_str(&gii).ok());
 
     let inventories = (0..create_inventory.quantity)
-        .into_iter()
         .map(|_| Inventory {
             id: None,
-            event_id: event_id,
+            event_id,
             status: INVENTORY_STATUS_AVAILABLE.to_string(),
             reserved_until: Utc::now(),
-            generate_inventory_id: generate_inventory_id,
+            generate_inventory_id,
             concurrency_stamp : ObjectId::new().to_hex()
         })
         .collect();

@@ -57,7 +57,7 @@ impl  From<&Event> for EventDetails {
             None => "".to_string(),
         };
         EventDetails {
-            id: id,
+            id,
             name: value.name.clone(),
             price: value.price,
             start_sale_date_time: value.start_sale_date_time,

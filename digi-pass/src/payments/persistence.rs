@@ -22,7 +22,7 @@ impl MongoDbPaymentRepository {
     pub fn new(client: Client, database: String) -> Self {
         MongoDbPaymentRepository {
             client,
-            database: database,
+            database,
             collection: "Payments".to_string(),
         }
     }

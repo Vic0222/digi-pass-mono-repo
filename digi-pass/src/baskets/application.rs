@@ -54,8 +54,8 @@ impl BasketService {
         Ok(CreateBasketResult{ basket_id : basket_id.ok_or(anyhow::anyhow!("Failed creating basket"))? })
     }
 
-    pub async fn get_valid_basket(&self, basket_id: &String) -> anyhow::Result<Option<data_transfer_objects::Basket>> {
-        let basket = self.basket_repository.get(&basket_id).await?;
+    pub async fn get_valid_basket(&self, basket_id: &str) -> anyhow::Result<Option<data_transfer_objects::Basket>> {
+        let basket = self.basket_repository.get(basket_id).await?;
         
         match  basket {
             None => Ok(None),
@@ -96,9 +96,9 @@ fn map_dto_basket_to_data_basket(data_basket: &data_models::Basket) -> anyhow::R
     }
     
     let dto_basket = data_transfer_objects::Basket {
-        id: data_basket.id.and_then(|id| Some(id.to_hex())).ok_or(anyhow::anyhow!("No basket id!"))?,
-        basket_items: basket_items,
-        total_price: total_price
+        id: data_basket.id.map(|id| id.to_hex()).ok_or(anyhow::anyhow!("No basket id!"))?,
+        basket_items,
+        total_price
     };
     Ok(dto_basket)
 }
@@ -121,7 +121,7 @@ fn create_basketed_inventory(event: &EventDetails, reserved_inventory: &Reserved
     BasketedInventory::new(event.id.clone(), event.name.clone(), reserved_inventory.inventory_id.to_string(), reserved_inventory.reserved_until, event.price)
 }
 
-fn generate_reserve_inventory_request(add_basket_item_requests: &Vec<AddBasketItemRequest>) -> Vec<ReserveInventories> {
+fn generate_reserve_inventory_request(add_basket_item_requests: &[AddBasketItemRequest]) -> Vec<ReserveInventories> {
 
     add_basket_item_requests.iter().map(|add_basket_item_request| {
         ReserveInventories{ event_id: add_basket_item_request.event_id.clone(), quantity: add_basket_item_request.quantity  }

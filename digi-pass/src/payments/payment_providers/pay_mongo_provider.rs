@@ -62,7 +62,7 @@ impl PaymentProvider for PayMongoProvider {
 }
 
 fn basekt_item_to_line_item(basket_item: &BasketItem) -> Option<checkout::request::LineItem> {
-    if basket_item.basketed_inventories.len() == 0 {
+    if basket_item.basketed_inventories.is_empty() {
         return None;
     }
     let line_item = LineItem::new(

@@ -4,7 +4,7 @@ pub fn get_current_time() -> chrono::DateTime<chrono::Utc> {
 }
 
 
-#[cfg(any(test))]
+#[cfg(test)]
 pub fn get_current_time() -> chrono::DateTime<chrono::Utc> {
     match chrono::TimeZone::with_ymd_and_hms(&chrono::Utc, 2010, 1, 1, 1, 1, 1) {
         chrono::LocalResult::None => chrono::Utc::now(),

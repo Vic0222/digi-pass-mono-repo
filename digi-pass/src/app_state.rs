@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use axum::extract::FromRef;
 
 use crate::{baskets::application::BasketService, events::application::EventService, inventories::application::InventoryService, payments::application::PaymentService};

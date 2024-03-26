@@ -18,7 +18,7 @@ pub async fn paymongo_webhook(
     headers: HeaderMap,
     body: String,
 ) ->  Result<(), AppError>  {
-    let webhook: Webhook = serde_json::from_slice(&body.as_bytes())?;
+    let webhook: Webhook = serde_json::from_slice(body.as_bytes())?;
     let raw_signature = headers.get("Paymongo-Signature").ok_or(anyhow::anyhow!("Missing Paymongo-Signature"))?.to_str()?;
     webhook_handlers::handle_checkout_webhook(webhook, app_state.pay_mongo_checkout_webhook_key.as_str(), body, raw_signature, app_state.payment_service).await?;
 

@@ -13,7 +13,7 @@ pub trait EventRepository : Send + Sync  {
 
     async fn list(&self) -> anyhow::Result<Vec<Event>>;
 
-    async fn get_event(&self, event_id: &String) -> anyhow::Result<Option<Event>>;
+    async fn get_event(&self, event_id: &str) -> anyhow::Result<Option<Event>>;
 }
 
 #[derive(Clone)]
@@ -63,10 +63,10 @@ impl EventRepository for MongoDbEventRepository{
         Ok(events)
     }
 
-    async fn get_event(&self, event_id: &String) -> anyhow::Result<Option<Event>>{
+    async fn get_event(&self, event_id: &str) -> anyhow::Result<Option<Event>>{
         tracing::info!("Getting event {}", event_id);
         let event_collection = self.get_collection();
-        let event = event_collection.find_one(doc! {"_id":ObjectId::from_str(&event_id)? }, None).await?;
+        let event = event_collection.find_one(doc! {"_id":ObjectId::from_str(event_id)? }, None).await?;
         Ok(event)
     }
 }

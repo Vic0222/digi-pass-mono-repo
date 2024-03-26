@@ -15,7 +15,7 @@ impl EventService {
     pub fn new(client: Client, database: String) -> Self {
         let event_repository = Arc::new(MongoDbEventRepository::new(client, database));
         EventService {
-            event_repository: event_repository,
+            event_repository,
         }
     }
 
@@ -25,7 +25,7 @@ impl EventService {
 
         let id = self.event_repository.add(event).await?;
         Ok(CreateEventResult{
-            id: id
+            id
         })
     }
 
@@ -34,9 +34,9 @@ impl EventService {
         Ok(events)
     }
 
-    pub async fn get_event(&self, event_id: &String) -> anyhow::Result<Option<EventDetails>> {
+    pub async fn get_event(&self, event_id: &str) -> anyhow::Result<Option<EventDetails>> {
         let event_details = self.event_repository.get_event(event_id).await?
-            .and_then(|event| Some((&event).into()));
+            .map(|event| (&event).into());
         Ok(event_details)
     }
 }

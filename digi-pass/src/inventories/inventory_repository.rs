@@ -14,7 +14,7 @@ pub trait InventoryRepository : Send + Sync{
     async fn add_batch(&self, inventories: Vec<Inventory>) -> anyhow::Result<()>;
     async fn add_generate_inventory(&self, generate_inventory: &GenerateInventory) -> anyhow::Result<String>;
     async fn get_unreserved_inventories(&self, event_id: String, quantity: i32, cut_off: chrono::DateTime<chrono::Utc>) -> anyhow::Result<Vec<Inventory>>;
-    async fn batch_update_reservations(&self, inventories: &Vec<Inventory>) -> anyhow::Result<()>;
+    async fn batch_update_reservations(&self, inventories: &[Inventory]) -> anyhow::Result<()>;
 }
 
 
@@ -68,7 +68,7 @@ impl InventoryRepository for MongoDbInventoryRepository {
     async fn get_unreserved_inventories(&self, event_id: String, quantity: i32, cut_off: chrono::DateTime<chrono::Utc>) -> anyhow::Result<Vec<Inventory>>{
         
         let inventory_collection = self.get_inventory_collection();
-        let find_options = FindOptions::builder().limit(i64::try_from(quantity).ok()).build();
+        let find_options = FindOptions::builder().limit(i64::from(quantity)).build();
 
         let mut docs = inventory_collection.find(doc!{"event_id": ObjectId::from_str(&event_id)?, "status": INVENTORY_STATUS_AVAILABLE, "reserved_until": doc! { "$lt": cut_off } }, find_options).await?;
         let mut inventories: Vec<Inventory> = vec![];
@@ -78,7 +78,7 @@ impl InventoryRepository for MongoDbInventoryRepository {
         Ok(inventories)
     }
 
-    async fn batch_update_reservations(&self, inventories: &Vec<Inventory>) -> anyhow::Result<()>{
+    async fn batch_update_reservations(&self, inventories: &[Inventory]) -> anyhow::Result<()>{
         let context = BatchUpdateReservationContext { database: self.database.clone(), collecion: self.collection.clone(), inventories};
         let _ = self.client.start_session(None).await?
             .with_transaction(context,  |session, context|batch_update_reservations_internal(session, context).boxed(), None).await?;
@@ -89,7 +89,7 @@ impl InventoryRepository for MongoDbInventoryRepository {
 struct  BatchUpdateReservationContext<'a> {
     database: String,
     collecion: String,
-    inventories: &'a Vec<Inventory>
+    inventories: &'a [Inventory]
 }
 
 async fn batch_update_reservations_internal(session: &mut ClientSession, context: &mut BatchUpdateReservationContext<'_>) -> anyhow::Result<(), mongodb::error::Error> {

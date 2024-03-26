@@ -6,7 +6,7 @@ mod baskets;
 mod payments;
 pub mod helpers;
 
-use std::{env, sync::Arc};
+use std::env;
 use aws_sdk_secretsmanager::types::Filter;
 use lambda_http::run;
 
@@ -65,7 +65,7 @@ fn is_running_in_lambda() -> bool {
 async fn main() {
 
     println!("loading env variables from file");
-    if let Ok(_) = dotenv() {
+    if dotenv().is_ok() {
         println!("Env variables from file successful");
     }
     if is_running_in_lambda() {
@@ -113,7 +113,7 @@ async fn main() {
     .expect("PayMongo payment method types not found.");
     
     let pay_mongo_payment_method_types_list = pay_mongo_payment_method_types
-        .split(",")
+        .split(',')
         .map(|s| s.to_string())
         .collect::<Vec<String>>();
 

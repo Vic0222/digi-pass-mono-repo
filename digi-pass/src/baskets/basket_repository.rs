@@ -9,7 +9,7 @@ use super::data_models::Basket;
 #[async_trait]
 pub trait BasketRepository : Send + Sync  {
     async fn add(&self, basket: Basket) -> anyhow::Result<Option<String>>;
-    async fn get (&self, id: &String) -> anyhow::Result<Option<Basket>>;
+    async fn get (&self, id: &str) -> anyhow::Result<Option<Basket>>;
 }
 
 
@@ -43,12 +43,12 @@ impl BasketRepository for MongoDbBasketRepository{
 
         let collection = self.get_collection();
         let result = collection.insert_one(basket, None).await?;
-        Ok(result.inserted_id.as_object_id().and_then(|oid| Some(oid.to_hex()) ))
+        Ok(result.inserted_id.as_object_id().map(|oid| oid.to_hex() ))
     }
 
-    async fn get (&self, id: &String) -> anyhow::Result<Option<Basket>> {
+    async fn get (&self, id: &str) -> anyhow::Result<Option<Basket>> {
         let collection = self.get_collection();
-        let filter = mongodb::bson::doc! {"_id": ObjectId::from_str(&id)? };
+        let filter = mongodb::bson::doc! {"_id": ObjectId::from_str(id)? };
         let result = collection.find_one(filter, None).await?;
         Ok(result)
     }
