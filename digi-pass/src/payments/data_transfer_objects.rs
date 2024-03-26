@@ -3,13 +3,14 @@ use validator::Validate;
 
 #[derive(Validate, Deserialize, Debug)]
 pub struct  CheckoutRequest {
+    #[validate(length(min = 1))]
     pub basket_id: String,
 }
 
 #[derive(Serialize, Debug)]
 pub struct  CheckoutResponse {
-    checkout_id: String,
-    checkout_url: String,
+    pub checkout_id: String,
+    pub checkout_url: String,
 }
 
 

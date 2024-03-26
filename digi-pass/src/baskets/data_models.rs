@@ -28,6 +28,7 @@ pub struct BasketItem{
 #[derive(Serialize, Deserialize)]
 pub struct BasketedInventory{
     pub event_id: String,
+    pub name: String,
     pub inventory_id: String,
     pub reserved_until: DateTime<Utc>,
     pub price: i32,
@@ -35,9 +36,10 @@ pub struct BasketedInventory{
 
 impl BasketedInventory {
     
-    pub fn new(event_id: String, inventory_id: String, reserved_until: DateTime<Utc>, price: i32) -> Self {
+    pub fn new(event_id: String, name: String, inventory_id: String, reserved_until: DateTime<Utc>, price: i32) -> Self {
         BasketedInventory {
             event_id,
+            name,
             inventory_id,
             reserved_until,
             price

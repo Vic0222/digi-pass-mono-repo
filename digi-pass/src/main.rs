@@ -123,7 +123,7 @@ async fn main() {
 
     let basket_service = BasketService::new(client.clone(), database.clone(), inventory_service.clone(), event_service.clone());
 
-    let payment_service = PaymentService::new(basket_service.clone(), inventory_service.clone(), event_service.clone(), pay_mongo_base_url, pay_mongo_secret_base64, pay_mongo_payment_method_types_list );
+    let payment_service = PaymentService::new(basket_service.clone(), pay_mongo_base_url, pay_mongo_secret_base64, pay_mongo_payment_method_types_list, client.clone(), database.clone() );
     
     let state = AppState {
         event_service,

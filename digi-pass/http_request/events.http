@@ -85,7 +85,7 @@ x-api-key: {{api_key}}
 
 
 ###
-POST {{baseUrl}}/basket
+POST {{baseUrl}}/baskets
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
 x-api-key: {{api_key}}
@@ -93,8 +93,18 @@ x-api-key: {{api_key}}
 {
     "add_basket_item_request" : [
         {
-            "event_id" : "{{event_id}}",
+            "event_id" : "66026740faddba649fd81f89",
             "quantity": 5
         }
     ]
+}
+
+###
+POST {{baseUrl}}/payments/checkout
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+x-api-key: {{api_key}}
+
+{
+    "basket_id" : "6602674ffaddba649fd8275f"
 }

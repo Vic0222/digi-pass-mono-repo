@@ -18,7 +18,7 @@ pub mod checkout {
                             show_line_items: true,
                             line_items,
                             payment_method_types,
-                            description: "".to_string(),
+                            description: "Pass".to_string(),
                         },
                     },
                 }

@@ -73,21 +73,32 @@ impl BasketService {
 
 
 fn map_dto_basket_to_data_basket(data_basket: &data_models::Basket) -> anyhow::Result<data_transfer_objects::Basket>{
+    let mut total_price = 0;
+    let mut basket_items = vec![];
+
+    for basket_item in data_basket.basket_items.iter() {
+        for basketed_inventory in basket_item.basketed_inventories.iter() {
+            total_price += basketed_inventory.price;
+        }
+        
+        let dto_basket_item = data_transfer_objects::BasketItem {
+            basketed_inventories: basket_item.basketed_inventories.iter().map(|basketed_inventory| {
+                data_transfer_objects::BasketedInventory {
+                    event_id: basketed_inventory.event_id.clone(),
+                    name: basketed_inventory.name.clone(),
+                    inventory_id: basketed_inventory.inventory_id.clone(),
+                    reserved_until: basketed_inventory.reserved_until,
+                    price: basketed_inventory.price
+                }
+            }).collect()
+        };
+        basket_items.push(dto_basket_item);
+    }
     
     let dto_basket = data_transfer_objects::Basket {
         id: data_basket.id.and_then(|id| Some(id.to_hex())).ok_or(anyhow::anyhow!("No basket id!"))?,
-        basket_items: data_basket.basket_items.iter().map(|basket_item| {
-            data_transfer_objects::BasketItem {
-                basketed_inventories: basket_item.basketed_inventories.iter().map(|basketed_inventory| {
-                    data_transfer_objects::BasketedInventory {
-                        event_id: basketed_inventory.event_id.clone(),
-                        inventory_id: basketed_inventory.inventory_id.clone(),
-                        reserved_until: basketed_inventory.reserved_until,
-                        price: basketed_inventory.price
-                    }
-                }).collect()
-            }
-        }).collect()
+        basket_items: basket_items,
+        total_price: total_price
     };
     Ok(dto_basket)
 }
@@ -107,7 +118,7 @@ fn is_all_inventory_reserved(basket: &Basket) -> bool {
 
 
 fn create_basketed_inventory(event: &EventDetails, reserved_inventory: &ReservedInventory) -> BasketedInventory {
-    BasketedInventory::new(event.id.clone(), reserved_inventory.inventory_id.to_string(), reserved_inventory.reserved_until, event.price)
+    BasketedInventory::new(event.id.clone(), event.name.clone(), reserved_inventory.inventory_id.to_string(), reserved_inventory.reserved_until, event.price)
 }
 
 fn generate_reserve_inventory_request(add_basket_item_requests: &Vec<AddBasketItemRequest>) -> Vec<ReserveInventories> {

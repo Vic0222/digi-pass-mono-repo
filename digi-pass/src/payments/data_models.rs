@@ -1,7 +1,9 @@
 use bson::oid::ObjectId;
+use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize)]
 pub struct Payment {
-    pub id: String,
+    pub id: Option<ObjectId>,
     pub amount: i32,
     pub currency: String,
     pub provider: String,
@@ -11,6 +13,36 @@ pub struct Payment {
     pub checkout_data : Option<CheckoutData>
 }
 
+
+impl Payment {
+    pub fn new(
+        amount: i32,
+        currency: String,
+        provider: String,
+        status: String,
+        created_at: chrono::DateTime<chrono::Utc>,
+        payment_type: String,
+        checkout_data: Option<CheckoutData>,
+    ) -> Self {
+        Payment {
+            id: None,
+            amount,
+            currency,
+            provider,
+            status,
+            created_at,
+            payment_type,
+            checkout_data,
+        }
+    }
+}
+
+
+
+
+
+
+#[derive(Serialize, Deserialize, Clone)]
 pub struct  CheckoutData {
     pub checkout_id: String,
     pub checkout_url: String,

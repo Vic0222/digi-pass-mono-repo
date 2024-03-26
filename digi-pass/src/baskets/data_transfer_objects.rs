@@ -20,20 +20,22 @@ pub struct CreateBasketResult {
     pub basket_id: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Default, Debug)]
 pub struct Basket {
     pub id: String,
     pub basket_items: Vec<BasketItem>,
+    pub total_price: i32,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Default, Debug)]
 pub struct BasketItem{
     pub basketed_inventories: Vec<BasketedInventory>
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Default, Debug)]
 pub struct BasketedInventory{
     pub event_id: String,
+    pub name: String,
     pub inventory_id: String,
     pub reserved_until: DateTime<Utc>,
     pub price: i32,
