@@ -67,6 +67,13 @@ Resources:
             Method: GET
             RestApiId:
               Ref: RestApi
+        PayMongoWebhookResource:
+          Type: Api
+          Properties:
+            Path: "/payments/checkout/paymongo"
+            Method: POST
+            RestApiId:
+              Ref: RestApi
         RootResources:
           Type: Api
           Properties:
@@ -112,7 +119,7 @@ Resources:
       KeyType: API_KEY
       KeyId: !Ref DigiPassAPIGatewayApiKey2
 
-  ApiDeployment2:
+  ApiDeployment3:
     Type: AWS::ApiGateway::Deployment
     Properties:
       RestApiId: !Ref RestApi
@@ -124,7 +131,7 @@ Resources:
       StageName: Prod
       Description: Prod Stage
       RestApiId: !Ref RestApi
-      DeploymentId: !Ref ApiDeployment2
+      DeploymentId: !Ref ApiDeployment3
 
   APIGatewayRole:
     Type: AWS::IAM::Role
