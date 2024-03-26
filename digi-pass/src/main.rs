@@ -6,7 +6,7 @@ mod baskets;
 mod payments;
 pub mod helpers;
 
-use std::env;
+use std::{env, sync::Arc};
 use aws_sdk_secretsmanager::types::Filter;
 use lambda_http::run;
 
@@ -116,6 +116,9 @@ async fn main() {
         .split(",")
         .map(|s| s.to_string())
         .collect::<Vec<String>>();
+
+    let pay_mongo_checkout_webhook_key = env::var("PayMongo__CheckoutWebhookKey")
+        .expect("PayMongo checkout webhook key not found.");
     
     let event_service = EventService::new(client.clone(), database.clone());
 
@@ -129,11 +132,12 @@ async fn main() {
         event_service,
         inventory_service,
         basket_service,
-        payment_service
+        payment_service,
+        pay_mongo_checkout_webhook_key
     };
     
     // build our application with a route
-    let app = Router::<AppState>::new()
+    let app = Router::new()
         // `GET /` goes to `root`
         .route(
             "/events",
@@ -163,7 +167,10 @@ async fn main() {
             post(self::payments::controller::checkout),
         )
         .layer(jwt_auth.into_layer())
-        
+        .route(
+            "/payments/checkout/paymongo",
+            post(self::payments::controller::paymongo_webhook),
+        )
         .route("/", get(index))
         .route("/version", get(index))
         .layer(

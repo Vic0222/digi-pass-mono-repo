@@ -9,7 +9,7 @@ use crate::{
 ;
 
 use super::{
-    constants::CURRENCY,
+    constants::{CURRENCY, PAYMENT_STATUS_PAID},
     data_models::Payment,
     data_transfer_objects::{CheckoutRequest, CheckoutResponse},
     payment_providers::{pay_mongo_provider::PayMongoProvider, PaymentProvider}, persistence::{MongoDbPaymentRepository, PaymentRepository},
@@ -84,5 +84,19 @@ impl PaymentService {
             checkout_data.checkout_id,
             checkout_data.checkout_url,
         ))
+    }
+
+    pub async fn mark_payment_as_paid(&self, checkout_id: &str) -> anyhow::Result<()> {
+        
+        let mut payment = self
+            .payment_repository
+            .find_one_by_checkout_id(checkout_id)
+            .await?
+            .ok_or(anyhow::anyhow!("Payment not found: checkout_id:{:?}", checkout_id))?;
+        
+        payment.status = PAYMENT_STATUS_PAID.to_string();
+
+        self.payment_repository.update(&mut payment).await?;
+        Ok(())
     }
 }

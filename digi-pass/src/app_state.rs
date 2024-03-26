@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::extract::FromRef;
 
 use crate::{baskets::application::BasketService, events::application::EventService, inventories::application::InventoryService, payments::application::PaymentService};
@@ -7,4 +9,6 @@ pub struct AppState {
     pub inventory_service: InventoryService,
     pub basket_service: BasketService,
     pub payment_service: PaymentService,
+    pub pay_mongo_checkout_webhook_key: String,
 }
+

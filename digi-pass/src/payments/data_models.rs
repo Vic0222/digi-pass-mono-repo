@@ -1,9 +1,10 @@
-use bson::oid::ObjectId;
+use bson::{oid::ObjectId, Bson};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Payment {
     pub id: Option<ObjectId>,
+    pub concurrency_stamp: String,
     pub basket_id: Option<ObjectId>,
     pub amount: i32,
     pub currency: String,
@@ -28,6 +29,7 @@ impl Payment {
     ) -> Self {
         Payment {
             id: None,
+            concurrency_stamp: ObjectId::new().to_hex(),
             basket_id,
             amount,
             currency,
@@ -40,6 +42,12 @@ impl Payment {
     }
 }
 
+
+impl From<&Payment> for Bson {
+    fn from(value: &Payment) -> Self {
+        bson::to_bson(value).unwrap()
+    }
+}
 
 
 
