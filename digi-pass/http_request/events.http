@@ -106,5 +106,58 @@ Content-Type: application/json
 x-api-key: {{api_key}}
 
 {
-    "basket_id" : "6602674ffaddba649fd8275f"
+    "basket_id" : "660270a8e1da64eac33606f3"
+}
+
+###
+POST {{baseUrl}}/payments/checkout/paymongo
+Content-Type: application/json
+Paymongo-Signature: t=1496734173,te=1447a89e7ecebeda32sffs62cdca3fa51cad7e77a0e56ff536d0ce8e108d8bd,li=3f7bs59d200aae63f272406069a9788598b792a944a07aba816edb039989a39
+
+
+{
+   "data":{
+      "id":"evt_41waYXad8VuenT671SucbQJF",
+      "type":"event",
+      "attributes":{
+         "type":"source.chargeable",
+         "livemode":true,
+         "data":{
+            "id":"src_wZ8pJPV6tL4Dwfq8YgaXMKAR",
+            "type":"source",
+            "attributes":{
+               "amount":10000,
+               "billing":{
+                  "address":{
+                     "city":"Taguig",
+                     "country":"PH",
+                     "line1":"9th Avenue and 26th Street, Unit 3308",
+                     "line2":"High Street South Corporate Plaza Tower 2",
+                     "postal_code":"1634",
+                     "state":"Metro Manila"
+                  },
+                  "email":"trizleon@paymongo.com",
+                  "name":"Triz Leon",
+                  "phone":"09168268582"
+               },
+               "currency":"PHP",
+               "livemode":true,
+               "redirect":{
+                  "checkout_url":"https://someurl",
+                  "failed":"https://links.staging.paymongo.dev/gcash/failed",
+                  "success":"https://links.staging.paymongo.dev/gcash/success"
+               },
+               "status":"chargeable",
+               "type":"grab_pay",
+               "created_at":1582178677
+            }
+         },
+         "previous_data":{
+            
+         },
+         "pending_webhooks":0,
+         "created_at":1582178707,
+         "updated_at":1582178707
+      }
+   }
 }

@@ -59,6 +59,8 @@ Resources:
           JwtConfig__Audience: http://localhost:3000/
           RUST_LOG: "info,digi_pass=debug"
           AWS_LAMBDA_HTTP_IGNORE_STAGE_IN_PATH: "true"
+          PayMongo__BaseUrl: https://api.paymongo.com
+          PayMongo__PaymentMethodTypes: card,gcash,paymaya,grab_pay
       Events:
         VersionResource:
           Type: Api
