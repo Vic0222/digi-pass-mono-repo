@@ -1,10 +1,11 @@
-use std::sync::Arc;
+use std::{str::FromStr, sync::Arc};
 
+use bson::oid::ObjectId;
 use chrono::Utc;
 use mongodb::Client;
 
-use crate::
-    baskets::application::BasketService
+use crate::{
+    baskets::application::BasketService, payments::constants::{PAYMENT_STATUS_PENDING, PAYMENT_TYPE_CHECKOUT}}
 ;
 
 use super::{
@@ -67,12 +68,13 @@ impl PaymentService {
         let checkout_data = self.payment_provider.prepare_checkout(&basket).await?;
 
         let payment = Payment::new(
+            Some(ObjectId::from_str(&basket.id)?),
             basket.total_price,
             CURRENCY.to_string(),
             self.payment_provider.get_name(),
-            "initial".to_string(),
+            PAYMENT_STATUS_PENDING.to_string(),
             Utc::now(),
-            "checkout".to_string(),
+            PAYMENT_TYPE_CHECKOUT.to_string(),
             Some(checkout_data.clone()),
         );
 

@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize)]
 pub struct Payment {
     pub id: Option<ObjectId>,
+    pub basket_id: Option<ObjectId>,
     pub amount: i32,
     pub currency: String,
     pub provider: String,
@@ -16,6 +17,7 @@ pub struct Payment {
 
 impl Payment {
     pub fn new(
+        basket_id: Option<ObjectId>,
         amount: i32,
         currency: String,
         provider: String,
@@ -26,6 +28,7 @@ impl Payment {
     ) -> Self {
         Payment {
             id: None,
+            basket_id,
             amount,
             currency,
             provider,
