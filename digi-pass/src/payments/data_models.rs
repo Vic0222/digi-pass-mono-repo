@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Payment {
+    #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     pub id: Option<ObjectId>,
     pub concurrency_stamp: String,
     pub basket_id: Option<ObjectId>,
@@ -10,6 +11,7 @@ pub struct Payment {
     pub currency: String,
     pub provider: String,
     pub status: String,
+    #[serde(with = "bson::serde_helpers::chrono_datetime_as_bson_datetime")]
     pub created_at: chrono::DateTime<chrono::Utc>,
     pub payment_type: String,
     pub checkout_data : Option<CheckoutData>

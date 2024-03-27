@@ -52,7 +52,7 @@ impl PaymentRepository for MongoDbPaymentRepository {
         let result = self
             .get_collection()
             .find_one(
-                Some(doc! {"checkout_data" :{"checkout_id": checkout_id}}),
+                Some(doc! {"checkout_data.checkout_id" : checkout_id}),
                 None,
             )
             .await?;
@@ -66,7 +66,10 @@ impl PaymentRepository for MongoDbPaymentRepository {
 
         let update = doc! {"$set": bson::to_bson(&payment)? };
         
-        self.get_collection().update_one(filter, update, None).await?;
+        let update_result = self.get_collection().update_one(filter, update, None).await?;
+        if update_result.matched_count == 0 {
+            return  Err(anyhow::anyhow!("Failed to update payment"));
+        }
         Ok(())
     }
 }
