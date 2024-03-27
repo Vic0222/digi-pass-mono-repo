@@ -22,7 +22,7 @@ pub async fn paymongo_webhook(
     let raw_signature = headers.get("Paymongo-Signature").ok_or(anyhow::anyhow!("Missing Paymongo-Signature"))?.to_str()?;
     tracing::info!("body: {}", body);
     tracing::info!("raw_signature: {}", raw_signature);
-    tracing::info!("key: {}", pay_mongo_checkout_webhook_key);
+    tracing::info!("key: {}", &app_state.pay_mongo_checkout_webhook_key);
     let result = webhook_handlers::handle_checkout_webhook(webhook, app_state.pay_mongo_checkout_webhook_key.as_str(), body, raw_signature, app_state.payment_service).await;
     if let Err(err) = result {
         tracing::error!("Error handling webhook: {:?}", err);
