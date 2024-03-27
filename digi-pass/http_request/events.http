@@ -84,7 +84,8 @@ x-api-key: {{api_key}}
 }
 
 
-###
+### 
+# @name CreateBasket
 POST {{baseUrl}}/baskets
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
@@ -106,7 +107,7 @@ Content-Type: application/json
 x-api-key: {{api_key}}
 
 {
-    "basket_id" : "660270a8e1da64eac33606f3"
+    "basket_id" : " {{CreateBasket.response.body.$.basket_id}}"
 }
 
 ###
