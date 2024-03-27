@@ -12,9 +12,17 @@ pub async fn handle_checkout_webhook(webhook:Webhook, key :&str, raw: String, ra
     //verify signature
     let (timestamp, signature) = slice_raw_siganture(raw_signature, webhook.data.attributes.livemode)?;
     let mut mac = HmacSha256::new_from_slice(key[..].as_bytes())?;
-    mac.update(format!("{timestamp}.{raw}").as_bytes());
+    let data = &format!("{}.{}", timestamp, raw);
+    tracing::debug!("data: {}", data);
+    mac.update(data.as_bytes());
 
-    mac.verify_slice(signature.as_bytes())?;
+    let byts = mac.finalize().into_bytes();
+    tracing::debug!("bytes: {}", hex::encode(&byts));
+
+    if signature != hex::encode(&byts).as_str() {
+        tracing::error!("Signature missmatch: {:?}", signature);
+        return  Ok(());
+    }
 
     //validate event type
     if webhook.data.attributes.attributes_type != "checkout_session.payment.paid" {
