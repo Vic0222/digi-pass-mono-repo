@@ -29,7 +29,8 @@ pub struct Basket {
 
 #[derive(Serialize, Default, Debug)]
 pub struct BasketItem{
-    pub basketed_inventories: Vec<BasketedInventory>
+    pub basketed_inventories: Vec<BasketedInventory>,
+    pub total_price: i32,
 }
 
 #[derive(Serialize, Default, Debug)]

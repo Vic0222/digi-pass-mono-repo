@@ -77,8 +77,10 @@ fn map_dto_basket_to_data_basket(data_basket: &data_models::Basket) -> anyhow::R
     let mut basket_items = vec![];
 
     for basket_item in data_basket.basket_items.iter() {
+        let mut basket_item_total_price = 0;
         for basketed_inventory in basket_item.basketed_inventories.iter() {
             total_price += basketed_inventory.price;
+            basket_item_total_price += basketed_inventory.price;
         }
         
         let dto_basket_item = data_transfer_objects::BasketItem {
@@ -88,9 +90,10 @@ fn map_dto_basket_to_data_basket(data_basket: &data_models::Basket) -> anyhow::R
                     name: basketed_inventory.name.clone(),
                     inventory_id: basketed_inventory.inventory_id.clone(),
                     reserved_until: basketed_inventory.reserved_until,
-                    price: basketed_inventory.price
+                    price: basketed_inventory.price,
                 }
-            }).collect()
+            }).collect(),
+            total_price: basket_item_total_price
         };
         basket_items.push(dto_basket_item);
     }
