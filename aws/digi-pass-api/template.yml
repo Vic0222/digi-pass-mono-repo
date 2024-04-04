@@ -95,7 +95,7 @@ Resources:
     Properties:
       ApiStages:
         - ApiId: !Ref RestApi
-          Stage: !Ref RestApiProdStage
+          Stage: !Ref RestApiProd2Stage
       Description: Digi Pass API Usage Plan
       Throttle:
         BurstLimit: 1000
@@ -111,7 +111,7 @@ Resources:
       Enabled: 'true'
       StageKeys:
         - RestApiId: !Ref RestApi
-          StageName: !Ref RestApiProdStage
+          StageName: !Ref RestApiProd2Stage
 
   DigiPassAPIGatewayApiKey2Usage:
     Type: AWS::ApiGateway::UsagePlanKey
