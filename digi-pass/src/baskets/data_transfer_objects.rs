@@ -23,6 +23,7 @@ pub struct CreateBasketResult {
 #[derive(Serialize, Default, Debug)]
 pub struct Basket {
     pub id: String,
+    pub valid_until: DateTime<Utc>,
     pub basket_items: Vec<BasketItem>,
     pub total_price: i32,
 }

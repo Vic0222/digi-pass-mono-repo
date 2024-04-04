@@ -88,7 +88,7 @@ Resources:
   RestApi:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: Prod
+      StageName: Prod2
     
   DigiPassAPIGatewayUsagePlan:
     Type: AWS::ApiGateway::UsagePlan

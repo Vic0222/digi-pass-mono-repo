@@ -48,7 +48,8 @@ impl BasketService {
         }
             
         //create and save basket
-        let basket = Basket::new(basket_items);
+        let valid_until = Utc::now() + chrono::Duration::minutes(30);
+        let basket = Basket::new(valid_until, basket_items);
         let basket_id = self.basket_repository.add(basket).await?;
         
         Ok(CreateBasketResult{ basket_id : basket_id.ok_or(anyhow::anyhow!("Failed creating basket"))? })
@@ -63,12 +64,19 @@ impl BasketService {
                 if !is_all_inventory_reserved(&basket) {
                     return Ok(None);
                 }
+                if is_basket_expired(&basket) {
+                    return Ok(None);
+                }
                 Ok(Some(map_dto_basket_to_data_basket(&basket)?))
             }
         }
     }
     
     
+}
+
+fn is_basket_expired(basket: &Basket) -> bool {
+    return basket.valid_until < Utc::now();
 }
 
 
@@ -100,6 +108,7 @@ fn map_dto_basket_to_data_basket(data_basket: &data_models::Basket) -> anyhow::R
     
     let dto_basket = data_transfer_objects::Basket {
         id: data_basket.id.map(|id| id.to_hex()).ok_or(anyhow::anyhow!("No basket id!"))?,
+        valid_until: data_basket.valid_until,
         basket_items,
         total_price
     };

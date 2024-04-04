@@ -56,7 +56,7 @@ impl InventoryService {
         let _event = self.event_service.get_event(&reserve_inventories.event_id).await?.ok_or(anyhow::anyhow!("Event not found"))?;
         
         let now = Utc::now();
-        let reserved_until = now + chrono::Duration::minutes(30);
+        let reserved_until = now + chrono::Duration::minutes(90);
         let mut inventories = self.inventory_repository.get_unreserved_inventories(reserve_inventories.event_id.clone(), reserve_inventories.quantity, now).await?;
         if inventories.len()  != reserve_inventories.quantity as usize {
             return Err(anyhow::anyhow!("Not enough inventories: {:?}", inventories.len()));
