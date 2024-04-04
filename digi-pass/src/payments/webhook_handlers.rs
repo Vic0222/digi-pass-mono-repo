@@ -4,8 +4,8 @@ pub async fn handle_maya_checkout_webhook(webhook:MayaWebhookRequest, payment_se
     tracing::debug!("Webhook received: {:?}", webhook);
 
     //validate event type
-    if webhook.payment_status != "PAYMENT_SUCCESS" {
-        tracing::error!("Payment failed or pneding: {:?}", &webhook.payment_status);
+    if webhook.status != "PAYMENT_SUCCESS" {
+        tracing::error!("Payment failed or pneding: {:?}", &webhook.status);
         return  Ok(());
     }
 

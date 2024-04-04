@@ -59,8 +59,7 @@ Resources:
           JwtConfig__Audience: http://localhost:3000/
           RUST_LOG: "info,digi_pass=debug"
           AWS_LAMBDA_HTTP_IGNORE_STAGE_IN_PATH: "true"
-          PayMongo__BaseUrl: https://api.paymongo.com
-          PayMongo__PaymentMethodTypes: card,gcash,paymaya,grab_pay
+          PayMongo__BaseUrl: "https://pg-sandbox.paymaya.com"
       Events:
         VersionResource:
           Type: Api
@@ -72,7 +71,7 @@ Resources:
         PayMongoWebhookResource:
           Type: Api
           Properties:
-            Path: "/payments/checkout/paymongo"
+            Path: "/payments/webhook/maya"
             Method: POST
             RestApiId:
               Ref: RestApi
@@ -89,14 +88,14 @@ Resources:
   RestApi:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: Dev
+      StageName: Prod
     
   DigiPassAPIGatewayUsagePlan:
     Type: AWS::ApiGateway::UsagePlan
     Properties:
       ApiStages:
         - ApiId: !Ref RestApi
-          Stage: !Ref ApiProdStage
+          Stage: !Ref RestApiProdStage
       Description: Digi Pass API Usage Plan
       Throttle:
         BurstLimit: 1000
@@ -112,7 +111,7 @@ Resources:
       Enabled: 'true'
       StageKeys:
         - RestApiId: !Ref RestApi
-          StageName: !Ref ApiProdStage
+          StageName: !Ref RestApiProdStage
 
   DigiPassAPIGatewayApiKey2Usage:
     Type: AWS::ApiGateway::UsagePlanKey
@@ -121,19 +120,6 @@ Resources:
       KeyType: API_KEY
       KeyId: !Ref DigiPassAPIGatewayApiKey2
 
-  ApiDeployment3:
-    Type: AWS::ApiGateway::Deployment
-    Properties:
-      RestApiId: !Ref RestApi
-      Description: "DigiPassAPIUsagePlan deployment"
-
-  ApiProdStage:
-    Type: AWS::ApiGateway::Stage
-    Properties:
-      StageName: Prod
-      Description: Prod Stage
-      RestApiId: !Ref RestApi
-      DeploymentId: !Ref ApiDeployment3
 
   APIGatewayRole:
     Type: AWS::IAM::Role
