@@ -105,7 +105,7 @@ POST {{baseUrl}}/payments/checkout
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
 x-api-key: {{api_key}}
-
+     
 {
     "basket_id" : "{{CreateBasket.response.body.$.basket_id}}"
 }
@@ -135,8 +135,8 @@ Paymongo-Signature: t=1711534472,te=5cb40280497c469fdce46430c867f7d8e62193c7389f
                             "postal_code": null,
                             "state": null
                         },
-                        "email": null,
-                        "name": null,
+                        "email":null,
+                        "name":  null,
                         "phone": null
                     },
                     "billing_information_fields_editable": "enabled",

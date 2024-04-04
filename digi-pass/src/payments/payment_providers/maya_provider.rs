@@ -15,7 +15,7 @@ pub struct MayaProvider {
 
 
 impl MayaProvider {
-    pub fn new(base_url: String, secret_base64: String, payment_method_types: Vec<String>) -> Self {
+    pub fn new(base_url: String, secret_base64: String) -> Self {
         Self {
             base_url,
             secret_base64
@@ -41,7 +41,7 @@ impl PaymentProvider for MayaProvider {
             items,
         );
 
-        let response  = client.post(format!("{}/{}", &self.base_url, "v1/checkout_sessions"))
+        let response  = client.post(format!("{}/{}", &self.base_url, "checkout/v1/checkouts"))
         .header("Content-Type", "application/json")
         .header("accept", "application/json")
         .header("authorization", format!("Basic {}", self.secret_base64))
@@ -52,8 +52,8 @@ impl PaymentProvider for MayaProvider {
         
         match response.error_for_status_ref() {
             Ok(_) => {
-                let data = response.json::<checkout::response::CheckoutResult>().await?;
-                Ok(CheckoutData::new(data.data.id, data.data.attributes.checkout_url))
+                let data = response.json::<checkout::response::CheckoutResponse>().await?;
+                Ok(CheckoutData::new(data.checkout_id, data.redirect_url))
             },
             Err(err) => {
                 tracing::error!("Response Text: {:?}", response.text().await?);

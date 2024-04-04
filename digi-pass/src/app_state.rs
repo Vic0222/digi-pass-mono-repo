@@ -7,6 +7,5 @@ pub struct AppState {
     pub inventory_service: InventoryService,
     pub basket_service: BasketService,
     pub payment_service: PaymentService,
-    pub pay_mongo_checkout_webhook_key: String,
 }
 

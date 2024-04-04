@@ -12,7 +12,7 @@ use super::{
     constants::{CURRENCY, PAYMENT_STATUS_PAID},
     data_models::Payment,
     data_transfer_objects::{CheckoutRequest, CheckoutResponse},
-    payment_providers::{pay_mongo_provider::PayMongoProvider, PaymentProvider}, persistence::{MongoDbPaymentRepository, PaymentRepository},
+    payment_providers::{maya_provider::MayaProvider, PaymentProvider}, persistence::{MongoDbPaymentRepository, PaymentRepository},
 };
 
 #[derive(Clone)]
@@ -27,14 +27,12 @@ impl PaymentService {
         basket_service: BasketService,
         provider_base_url: String,
         secret_base64: String,
-        payment_method_types: Vec<String>,
         client: Client, 
         database: String
     ) -> Self {
-        let payment_provider = Arc::new(PayMongoProvider::new(
+        let payment_provider = Arc::new(MayaProvider::new(
             provider_base_url,
             secret_base64,
-            payment_method_types,
         ));
 
         let payment_repository = Arc::new(
