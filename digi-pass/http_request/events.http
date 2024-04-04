@@ -111,205 +111,127 @@ x-api-key: {{api_key}}
 }
 
 ###
-POST {{baseUrl}}/payments/checkout/paymongo
+POST {{baseUrl}}/payments/webhook/maya
 Content-Type: application/json
-Paymongo-Signature: t=1711534472,te=5cb40280497c469fdce46430c867f7d8e62193c7389f9098a6e3c813bdadf4ed,li=
 
 {
-    "data": {
-        "id": "evt_JPBqtWR2wY7ppsj3HeR9Tznq",
-        "type": "event",
-        "attributes": {
-            "type": "checkout_session.payment.paid",
-            "livemode": false,
-            "data": {
-                "id": "cs_7yMM5J5tVFTRnpGG1EoDGtBh",
-                "type": "checkout_session",
-                "attributes": {
-                    "billing": {
-                        "address": {
-                            "city": null,
-                            "country": null,
-                            "line1": null,
-                            "line2": null,
-                            "postal_code": null,
-                            "state": null
-                        },
-                        "email":null,
-                        "name":  null,
-                        "phone": null
-                    },
-                    "billing_information_fields_editable": "enabled",
-                    "cancel_url": null,
-                    "checkout_url": "https://checkout.paymongo.com/cs_qzAtJyH1tHtKUYJ8LYv3Qym9_client_T5guKbw4jwwA43Q27HxamLEo#cGtfdGVzdF9YVjZiQUZmcEo1VWVpY25DRHd6VVFuOGE=",
-                    "client_key": "cs_qzAtJyH1tHtKUYJ8LYv3Qym9_client_T5guKbw4jwwA43Q27HxamLEo",
-                    "customer_email": null,
-                    "description": "Pass",
-                    "line_items": [
-                        {
-                            "amount": 25000,
-                            "currency": "PHP",
-                            "description": "Test Event 2323",
-                            "images": [],
-                            "name": "Test Event 2323",
-                            "quantity": 5
-                        }
-                    ],
-                    "livemode": false,
-                    "merchant": "Vicente Test Business",
-                    "paid_at": 1711534419,
-                    "payments": [
-                        {
-                            "id": "pay_hmoytgoh7pQ4zjgyck6LPgfc",
-                            "type": "payment",
-                            "attributes": {
-                                "access_url": null,
-                                "amount": 125000,
-                                "balance_transaction_id": "bal_txn_bPZw6sgwdfPPhLDqma9sYDXw",
-                                "billing": {
-                                    "address": {
-                                        "city": "",
-                                        "country": "",
-                                        "line1": "",
-                                        "line2": "",
-                                        "postal_code": "",
-                                        "state": ""
-                                    },
-                                    "email": "v.g.albonian.dev@gmail.com",
-                                    "name": "kjhkj",
-                                    "phone": "9382271979"
-                                },
-                                "currency": "PHP",
-                                "description": "Pass",
-                                "disputed": false,
-                                "external_reference_number": null,
-                                "fee": 3125,
-                                "instant_settlement": null,
-                                "livemode": false,
-                                "net_amount": 121875,
-                                "origin": "api",
-                                "payment_intent_id": "pi_pqLZdR42W5Xa4GgA1wVQwZ4b",
-                                "payout": null,
-                                "source": {
-                                    "id": "src_Trcpwa2nkexiudQ2g3ud3xVG",
-                                    "type": "gcash"
-                                },
-                                "statement_descriptor": "Vicente Test Business",
-                                "status": "paid",
-                                "tax_amount": null,
-                                "metadata": null,
-                                "refunds": [],
-                                "taxes": [],
-                                "available_at": 1712134800,
-                                "created_at": 1711534419,
-                                "credited_at": 1712739600,
-                                "paid_at": 1711534419,
-                                "updated_at": 1711534419
-                            }
-                        }
-                    ],
-                    "payment_intent": {
-                        "id": "pi_pqLZdR42W5Xa4GgA1wVQwZ4b",
-                        "type": "payment_intent",
-                        "attributes": {
-                            "amount": 125000,
-                            "capture_type": "automatic",
-                            "client_key": "pi_pqLZdR42W5Xa4GgA1wVQwZ4b_client_3neDA1AFQTWNmaKMxkXfCWuz",
-                            "currency": "PHP",
-                            "description": "Pass",
-                            "livemode": false,
-                            "statement_descriptor": "Vicente Test Business",
-                            "status": "succeeded",
-                            "last_payment_error": null,
-                            "payment_method_allowed": [
-                                "grab_pay",
-                                "paymaya",
-                                "card",
-                                "gcash"
-                            ],
-                            "payments": [
-                                {
-                                    "id": "pay_hmoytgoh7pQ4zjgyck6LPgfc",
-                                    "type": "payment",
-                                    "attributes": {
-                                        "access_url": null,
-                                        "amount": 125000,
-                                        "balance_transaction_id": "bal_txn_bPZw6sgwdfPPhLDqma9sYDXw",
-                                        "billing": {
-                                            "address": {
-                                                "city": "",
-                                                "country": "",
-                                                "line1": "",
-                                                "line2": "",
-                                                "postal_code": "",
-                                                "state": ""
-                                            },
-                                            "email": "v.g.albonian.dev@gmail.com",
-                                            "name": "kjhkj",
-                                            "phone": "9382271979"
-                                        },
-                                        "currency": "PHP",
-                                        "description": "Pass",
-                                        "disputed": false,
-                                        "external_reference_number": null,
-                                        "fee": 3125,
-                                        "instant_settlement": null,
-                                        "livemode": false,
-                                        "net_amount": 121875,
-                                        "origin": "api",
-                                        "payment_intent_id": "pi_pqLZdR42W5Xa4GgA1wVQwZ4b",
-                                        "payout": null,
-                                        "source": {
-                                            "id": "src_Trcpwa2nkexiudQ2g3ud3xVG",
-                                            "type": "gcash"
-                                        },
-                                        "statement_descriptor": "Vicente Test Business",
-                                        "status": "paid",
-                                        "tax_amount": null,
-                                        "metadata": null,
-                                        "refunds": [],
-                                        "taxes": [],
-                                        "available_at": 1712134800,
-                                        "created_at": 1711534419,
-                                        "credited_at": 1712739600,
-                                        "paid_at": 1711534419,
-                                        "updated_at": 1711534419
-                                    }
-                                }
-                            ],
-                            "next_action": null,
-                            "payment_method_options": {
-                                "card": {
-                                    "request_three_d_secure": "any"
-                                }
-                            },
-                            "metadata": null,
-                            "setup_future_usage": null,
-                            "created_at": 1711534381,
-                            "updated_at": 1711534420
-                        }
-                    },
-                    "payment_method_types": [
-                        "card",
-                        "grab_pay",
-                        "gcash",
-                        "paymaya"
-                    ],
-                    "payment_method_used": "gcash",
-                    "reference_number": null,
-                    "send_email_receipt": false,
-                    "show_description": false,
-                    "show_line_items": true,
-                    "status": "active",
-                    "success_url": null,
-                    "created_at": 1711534381,
-                    "updated_at": 1711534381,
-                    "metadata": null
-                }
-            },
-            "previous_data": {},
-            "created_at": 1711534420,
-            "updated_at": 1711534420
-        }
+  "id": "fa4da2ff-dcda-4367-a97d-0c9445147b73",
+  "items": [
+    {
+      "name": "Canvas Slip Ons",
+      "code": "CVG-096732",
+      "description": "Shoes",
+      "quantity": "1",
+      "amount": {
+        "value": 1000
+      },
+      "totalAmount": {
+        "value": 1000
+      }
     }
+  ],
+  "requestReferenceNumber": "5fc10b93-bdbd-4f31-b31d-4575a3785009",
+  "receiptNumber": "7fa0ff6fa5a6",
+  "createdAt": "2021-07-13T15:25:45.000Z",
+  "updatedAt": "2021-07-13T15:26:49.000Z",
+  "paymentScheme": "master-card",
+  "expressCheckout": true,
+  "refundedAmount": "0",
+  "canPayPal": false,
+  "expiredAt": "2021-07-13T16:25:45.000Z",
+  "status": "COMPLETED",
+  "paymentStatus": "PAYMENT_SUCCESS",
+  "paymentDetails": {
+    "responses": {
+      "efs": {
+        "paymentTransactionReferenceNo": "0bea058b-ae8e-4bfc-90d0-7fa0ff6fa5a6",
+        "status": "SUCCESS",
+        "receipt": {
+          "transactionId": "b8bb70e1-f44f-4db3-bcb9-a939d38455a4",
+          "receiptNo": "7fa0ff6fa5a6",
+          "approval_code": "00001234",
+          "approvalCode": "00001234"
+        },
+        "payer": {
+          "fundingInstrument": {
+            "card": {
+              "cardNumber": "542482******7140",
+              "expiryMonth": 9,
+              "expiryYear": "2023"
+            }
+          }
+        },
+        "amount": {
+          "total": {
+            "currency": "PHP",
+            "value": 1000
+          }
+        },
+        "created_at": "2021-07-13T15:26:49.514Z"
+      }
+    },
+    "paymentAt": "2021-07-13T15:26:49.000Z",
+    "3ds": false
+  },
+  "buyer": {
+    "contact": {
+      "phone": "+639086216587",
+      "email": "juan.delacruz@paymaya.com"
+    },
+    "firstName": "Juan",
+    "lastName": "Dela Cruz",
+    "billingAddress": {
+      "line1": "6F Launchpad",
+      "line2": "Reliance Street",
+      "city": "Mandaluyong City",
+      "state": "Metro Manila",
+      "zipCode": "1552",
+      "countryCode": "PH"
+    },
+    "shippingAddress": {
+      "line1": "6F Launchpad",
+      "line2": "Reliance Street",
+      "city": "Mandaluyong City",
+      "state": "Metro Manila",
+      "zipCode": "1552",
+      "countryCode": "PH"
+    }
+  },
+  "merchant": {
+    "currency": "PHP",
+    "email": "merchant@gmail.com",
+    "locale": "en",
+    "homepageUrl": "https://www.paymaya.com",
+    "isEmailToMerchantEnabled": true,
+    "isEmailToBuyerEnabled": true,
+    "isPaymentFacilitator": false,
+    "isPageCustomized": true,
+    "supportedSchemes": [
+      "Visa",
+      "Mastercard",
+      "JCB"
+    ],
+    "canPayPal": false,
+    "payPalEmail": null,
+    "payPalWebExperienceId": null,
+    "expressCheckout": true,
+    "name": "Omni Merchant via Mock Processor"
+  },
+  "totalAmount": {
+    "value": "1000",
+    "currency": "PHP",
+    "details": {
+      "discount": "100.00",
+      "serviceCharge": "0.00",
+      "shippingFee": "200.00",
+      "tax": "120.00",
+      "subtotal": "780.00"
+    }
+  },
+  "redirectUrl": {
+    "success": "https://www.merchantsite.com/success?id=5fc10b93-bdbd-4f31-b31d-4575a3785009",
+    "failure": "https://www.mechantsite.com/failure?id=5fc10b93-bdbd-4f31-b31d-4575a3785009",
+    "cancel": "https://www.merchantsite.com/cancel?id=5fc10b93-bdbd-4f31-b31d-4575a3785009"
+  },
+  "transactionReferenceNumber": "0bea058b-ae8e-4bfc-90d0-7fa0ff6fa5a6"
 }

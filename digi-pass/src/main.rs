@@ -157,7 +157,7 @@ async fn main() {
         )
         .layer(jwt_auth.into_layer())
         .route(
-            "/payments/checkout/maya",
+            "/payments/webhook/maya",
             post(self::payments::controller::maya_webhook),
         )
         .route("/", get(index))

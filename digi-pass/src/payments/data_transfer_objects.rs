@@ -1,3 +1,4 @@
+pub mod maya_webhook;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
@@ -22,43 +23,3 @@ impl CheckoutResponse {
     }
 }
 
-pub mod webhook {
-    use serde::{Deserialize, Serialize};
-
-    #[derive(Debug, Clone, Serialize, Deserialize)]
-    pub struct Webhook {
-        pub data: WebhookData,
-    }
-
-    #[derive(Debug, Clone, Serialize, Deserialize)]
-    pub struct WebhookData {
-        pub id: String,
-
-        #[serde(rename = "type")]
-        pub data_type: String,
-
-        pub attributes: Attributes,
-    }
-
-    #[derive(Debug, Clone, Serialize, Deserialize)]
-    pub struct Attributes {
-        #[serde(rename = "type")]
-        pub attributes_type: String,
-
-        pub livemode: bool,
-
-        pub data: AttributesData,
-
-        pub created_at: i64,
-
-        pub updated_at: i64,
-    }
-
-    #[derive(Debug, Clone, Serialize, Deserialize)]
-    pub struct AttributesData {
-        pub id: String,
-
-        #[serde(rename = "type")]
-        pub data_type: String,
-    }
-}
