@@ -88,14 +88,14 @@ Resources:
   RestApi:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: Prod2
+      StageName: Prod
     
   DigiPassAPIGatewayUsagePlan:
     Type: AWS::ApiGateway::UsagePlan
     Properties:
       ApiStages:
         - ApiId: !Ref RestApi
-          Stage: !Ref RestApiProd2Stage
+          Stage: !Ref RestApiProdStage
       Description: Digi Pass API Usage Plan
       Throttle:
         BurstLimit: 1000
@@ -111,7 +111,7 @@ Resources:
       Enabled: 'true'
       StageKeys:
         - RestApiId: !Ref RestApi
-          StageName: !Ref RestApiProd2Stage
+          StageName: !Ref RestApiProdStage
 
   DigiPassAPIGatewayApiKey2Usage:
     Type: AWS::ApiGateway::UsagePlanKey
