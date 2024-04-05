@@ -6,7 +6,7 @@ mod baskets;
 mod payments;
 pub mod helpers;
 
-use std::env;
+use std::{env, sync::Arc};
 use aws_sdk_secretsmanager::types::Filter;
 use lambda_http::run;
 
@@ -118,15 +118,15 @@ async fn main() {
 
     let payment_service = PaymentService::new(basket_service.clone(), maya_base_url, maya_secret_base64, client.clone(), database.clone() );
     
-    let state = AppState {
+    let state = Arc::new(AppState {
         event_service,
         inventory_service,
         basket_service,
         payment_service
-    };
-    
+    });
+
     // build our application with a route
-    let app = Router::new()
+    let app = Router::<Arc<AppState>>::new()
         // `GET /` goes to `root`
         .route(
             "/events",

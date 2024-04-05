@@ -1,20 +1,22 @@
+use std::sync::Arc;
+
 use axum::{extract::State, Json};
-use crate::{validation::ValidatedJson, AppError};
+use crate::{app_state::AppState, validation::ValidatedJson, AppError};
 
 use super::{application::EventService, data_transfer_objects::{CreateEvent, CreateEventResult, EventDetails}};
 
 pub async fn create(
-    State(event_service): State<EventService>,
+    State(state): State<Arc<AppState>>,
     ValidatedJson(data): ValidatedJson<CreateEvent>,
 ) -> Result<Json<CreateEventResult>, AppError> {
-    let result = event_service.create_event(data).await?;
+    let result = state.event_service.create_event(data).await?;
     Ok(Json(result))
 }
 
 pub async fn get(
-    State(event_service): State<EventService>
+    State(state): State<Arc<AppState>>,
 ) -> Result<Json<Vec<EventDetails>>, AppError>  {
-    let event_details = event_service.list().await?;
+    let event_details = state.event_service.list().await?;
 
     // this will be converted into a JSON response
     // with a status code of `201 Created`

@@ -1,6 +1,6 @@
 use super::{application::PaymentService, data_transfer_objects::maya_webhook::MayaWebhookRequest};
 
-pub async fn handle_maya_checkout_webhook(webhook:MayaWebhookRequest, payment_service: PaymentService) -> anyhow::Result<()> {
+pub async fn handle_maya_checkout_webhook(webhook:MayaWebhookRequest, payment_service: &PaymentService) -> anyhow::Result<()> {
     tracing::debug!("Webhook received: {:?}", webhook);
 
     //validate event type
