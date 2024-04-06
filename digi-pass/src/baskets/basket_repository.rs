@@ -12,6 +12,11 @@ pub trait BasketRepository : Send + Sync  {
     async fn get (&self, id: &str) -> anyhow::Result<Option<Basket>>;
 }
 
+impl Clone for Box<dyn BasketRepository> {
+    fn clone(&self) -> Self {
+        self.clone()
+    }
+}
 
 #[derive(Clone)]
 pub struct  MongoDbBasketRepository {

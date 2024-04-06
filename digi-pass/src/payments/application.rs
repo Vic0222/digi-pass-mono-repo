@@ -11,7 +11,7 @@ use crate::{
 use super::{
     constants::{CURRENCY, PAYMENT_STATUS_PAID},
     data_models::Payment,
-    data_transfer_objects::{CheckoutRequest, CheckoutResponse},
+    data_transfer_objects::{CheckoutRequest, CheckoutResponse, PaymentView},
     payment_providers::{maya_provider::MayaProvider, PaymentProvider}, persistence::{MongoDbPaymentRepository, PaymentRepository},
 };
 
@@ -96,5 +96,28 @@ impl PaymentService {
 
         self.payment_repository.update(&mut payment).await?;
         Ok(())
+    }
+    
+    pub async fn get_basket_payments(&self, basket_id: &str) -> anyhow::Result<Vec<PaymentView>> {
+        let payments = self.payment_repository.find_by_basket_id(basket_id).await?;
+        let payment_views = payments.iter().map(map_payment_to_payment_view).collect();
+
+        return Ok(payment_views);
+    }
+}
+
+fn map_payment_to_payment_view(payment: &Payment) -> PaymentView {
+    let id = payment.id.ok_or(anyhow::anyhow!("Failed to get object id for payment id")).unwrap().to_hex();
+    let basket_id = payment.basket_id.ok_or(anyhow::anyhow!("Failed to get object id for basket id")).unwrap().to_hex();
+    PaymentView {
+        id: id,
+        status: payment.status.clone(),
+        created_at: payment.created_at,
+        amount: payment.amount,
+        currency: payment.currency.clone(),
+        payment_type: payment.payment_type.clone(),
+        basket_id: basket_id,
+        concurrency_stamp: payment.concurrency_stamp.clone(),
+        provider: payment.provider.clone(),
     }
 }

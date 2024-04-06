@@ -23,3 +23,14 @@ impl CheckoutResponse {
     }
 }
 
+pub struct PaymentView {
+    pub id: String,
+    pub concurrency_stamp: String,
+    pub basket_id: String,
+    pub amount: i32,
+    pub currency: String,
+    pub provider: String,
+    pub status: String,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub payment_type: String,
+}

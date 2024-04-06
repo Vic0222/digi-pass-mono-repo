@@ -3,7 +3,7 @@ use std::sync::Arc;
 use chrono::Utc;
 use mongodb::Client;
 
-use crate::inventories::{data_transfer_objects::{ReserveInventories, ReservedInventory}, application::InventoryService};
+use crate::{inventories::{application::InventoryService, data_transfer_objects::{ReserveInventories, ReservedInventory}}, payments::application::PaymentService};
 use crate::events::{application::EventService, data_transfer_objects::EventDetails};
 
 use super::{basket_repository::{BasketRepository, MongoDbBasketRepository}, data_models::{self, Basket, BasketItem, BasketedInventory}, data_transfer_objects::{self, AddBasketItemRequest, CreateBasketRequest, CreateBasketResult}};
@@ -12,12 +12,12 @@ use super::{basket_repository::{BasketRepository, MongoDbBasketRepository}, data
 pub struct  BasketService {
     inventory_service: InventoryService,
     event_service: EventService,
-    basket_repository: Arc<dyn BasketRepository>,
+    basket_repository: Box<dyn BasketRepository>,
 }
 
 impl BasketService {
     pub fn new(client : Client, database: String, inventory_service: InventoryService, event_service: EventService) -> Self {
-        let basket_repository = Arc::new(MongoDbBasketRepository::new(client.clone(), database.clone(), "Baskets".to_string()));
+        let basket_repository = Box::new(MongoDbBasketRepository::new(client.clone(), database.clone(), "Baskets".to_string()));
         Self {inventory_service, basket_repository, event_service}
     }
 
@@ -70,6 +70,23 @@ impl BasketService {
                 Ok(Some(map_dto_basket_to_data_basket(&basket)?))
             }
         }
+    }
+
+    pub async fn purchase_basket(&self, payment_service:  &PaymentService, basket_id: &str) -> anyhow::Result<()> {
+
+        let basket = self.basket_repository.get(basket_id).await?;
+        
+        let basket = basket.ok_or(anyhow::anyhow!("Basket not found"))?;
+        if !is_all_inventory_reserved(&basket) {
+            return Err(anyhow::anyhow!("Not all inventory reserved"));
+        }
+        if is_basket_expired(&basket) {
+            return Err(anyhow::anyhow!("Basket expired"));
+        }
+        
+        let basket_payments = payment_service.get_basket_payments(basket_id).await?; 
+        
+        Ok(())
     }
     
     
