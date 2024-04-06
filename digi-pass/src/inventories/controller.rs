@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use axum::{extract::State, http::StatusCode, Json};
 
-use crate::{app_state::{self, AppState}, validation::ValidatedJson, AppError};
+use crate::{app_state::AppState, validation::ValidatedJson, AppError};
 
 use super::{data_transfer_objects::{CreateInventoryBatch, GenerateInventory, GenerateInventoryResult, ReserveInventories, ReserveInventoriesResult}, application::InventoryService};
 
