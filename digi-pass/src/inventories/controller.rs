@@ -4,7 +4,7 @@ use axum::{extract::State, http::StatusCode, Json};
 
 use crate::{app_state::AppState, validation::ValidatedJson, AppError};
 
-use super::{data_transfer_objects::{CreateInventoryBatch, GenerateInventory, GenerateInventoryResult, ReserveInventories, ReserveInventoriesResult}, application::InventoryService};
+use super::data_transfer_objects::{CreateInventoryBatch, GenerateInventory, GenerateInventoryResult, ReserveInventories, ReserveInventoriesResult};
 
 pub async fn generate_async(
     State(state): State<Arc<AppState>>,

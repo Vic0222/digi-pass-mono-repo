@@ -152,6 +152,10 @@ async fn main() {
             post(self::baskets::basket_controller::create),
         )
         .route(
+            "/baskets/purchase",
+            post(self::baskets::basket_controller::post_purchase),
+        )
+        .route(
             "/payments/checkout",
             post(self::payments::controller::checkout),
         )

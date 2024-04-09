@@ -42,3 +42,14 @@ pub struct BasketedInventory{
     pub reserved_until: DateTime<Utc>,
     pub price: i32,
 }
+
+#[derive(Debug, Validate, Deserialize)]
+pub struct PurchaseBasketRequest {
+    #[validate(length(min = 1))]
+    pub basket_id: String,
+}
+
+#[derive(Serialize, Deserialize, Default, Debug)]
+pub struct  PurchaseBasketResult {
+    pub order_id: String
+}

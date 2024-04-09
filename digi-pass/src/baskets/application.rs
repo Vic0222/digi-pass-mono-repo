@@ -9,7 +9,7 @@ use crate::{
         application::InventoryService,
         data_transfer_objects::{ReserveInventories, ReservedInventory},
     },
-    payments::{application::PaymentService, data_transfer_objects::PaymentView},
+    payments::application::PaymentService,
 };
 
 use super::{
@@ -22,7 +22,7 @@ use super::{
 pub struct BasketService {
     inventory_service: InventoryService,
     event_service: EventService,
-    basket_repository: Box<dyn BasketRepository>,
+    basket_repository: Arc<dyn BasketRepository>,
 }
 
 impl BasketService {
@@ -32,7 +32,7 @@ impl BasketService {
         inventory_service: InventoryService,
         event_service: EventService,
     ) -> Self {
-        let basket_repository = Box::new(MongoDbBasketRepository::new(
+        let basket_repository = Arc::new(MongoDbBasketRepository::new(
             client.clone(),
             database.clone(),
             "Baskets".to_string(),
