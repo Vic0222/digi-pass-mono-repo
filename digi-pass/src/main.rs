@@ -4,6 +4,7 @@ mod app_state;
 mod validation;
 mod baskets;
 mod payments;
+mod orders;
 pub mod helpers;
 
 use std::{env, sync::Arc};

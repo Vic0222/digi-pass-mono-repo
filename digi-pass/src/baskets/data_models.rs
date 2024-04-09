@@ -25,7 +25,8 @@ impl Basket {
 
 #[derive(Serialize, Deserialize)]
 pub struct BasketItem{
-    pub basketed_inventories: Vec<BasketedInventory>
+    pub basketed_inventories: Vec<BasketedInventory>,
+    pub price: i32,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -35,18 +36,16 @@ pub struct BasketedInventory{
     pub inventory_id: String,
     #[serde(with = "bson::serde_helpers::chrono_datetime_as_bson_datetime")]
     pub reserved_until: DateTime<Utc>,
-    pub price: i32,
 }
 
 impl BasketedInventory {
     
-    pub fn new(event_id: String, name: String, inventory_id: String, reserved_until: DateTime<Utc>, price: i32) -> Self {
+    pub fn new(event_id: String, name: String, inventory_id: String, reserved_until: DateTime<Utc>) -> Self {
         BasketedInventory {
             event_id,
             name,
             inventory_id,
-            reserved_until,
-            price
+            reserved_until
         }
     }
 }

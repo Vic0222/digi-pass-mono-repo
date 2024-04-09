@@ -40,7 +40,6 @@ pub struct BasketedInventory{
     pub name: String,
     pub inventory_id: String,
     pub reserved_until: DateTime<Utc>,
-    pub price: i32,
 }
 
 #[derive(Debug, Validate, Deserialize)]

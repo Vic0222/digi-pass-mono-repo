@@ -72,16 +72,21 @@ impl BasketService {
                     result.reserved_inventories.len()
                 ));
             }
-
-            let basket_item = BasketItem {
-                basketed_inventories: result
+            let basketed_inventories: Vec<BasketedInventory> = result
                     .reserved_inventories
                     .iter()
                     .map(|ri| create_basketed_inventory(&event, ri))
-                    .collect(),
-            };
+                    .collect();
 
-            basket_items.push(basket_item);
+            for basketed_inventory in basketed_inventories {
+                let basket_item = BasketItem {
+                    price: event.price ,
+                    basketed_inventories: vec![basketed_inventory],
+                };
+    
+                basket_items.push(basket_item);
+            }
+            
         }
 
         //create and save basket
@@ -109,7 +114,7 @@ impl BasketService {
                 if is_basket_expired(&basket) {
                     return Ok(None);
                 }
-                Ok(Some(map_dto_basket_to_data_basket(&basket)?))
+                Ok(Some(map_dto_basket_from_data_basket(&basket)?))
             }
         }
     }
@@ -156,29 +161,21 @@ fn compute_basket_total_price(basket: &Basket) -> i32 {
     let total_price = basket
         .basket_items
         .iter()
-        .map(|bi| {
-            bi.basketed_inventories
-                .iter()
-                .map(|basketed_inventory| basketed_inventory.price)
-                .sum::<i32>()
-        })
+        .map(|bi| bi.price)
         .sum();
 
     return total_price;
 }
 
-fn map_dto_basket_to_data_basket(
+fn map_dto_basket_from_data_basket(
     data_basket: &data_models::Basket,
 ) -> anyhow::Result<data_transfer_objects::Basket> {
     let mut total_price = 0;
     let mut basket_items = vec![];
 
     for basket_item in data_basket.basket_items.iter() {
-        let mut basket_item_total_price = 0;
-        for basketed_inventory in basket_item.basketed_inventories.iter() {
-            total_price += basketed_inventory.price;
-            basket_item_total_price += basketed_inventory.price;
-        }
+
+        total_price += basket_item.price;
 
         let dto_basket_item = data_transfer_objects::BasketItem {
             basketed_inventories: basket_item
@@ -190,11 +187,10 @@ fn map_dto_basket_to_data_basket(
                         name: basketed_inventory.name.clone(),
                         inventory_id: basketed_inventory.inventory_id.clone(),
                         reserved_until: basketed_inventory.reserved_until,
-                        price: basketed_inventory.price,
                     },
                 )
                 .collect(),
-            total_price: basket_item_total_price,
+            total_price: basket_item.price,
         };
         basket_items.push(dto_basket_item);
     }
@@ -230,8 +226,7 @@ fn create_basketed_inventory(
         event.id.clone(),
         event.name.clone(),
         reserved_inventory.inventory_id.to_string(),
-        reserved_inventory.reserved_until,
-        event.price,
+        reserved_inventory.reserved_until
     )
 }
 

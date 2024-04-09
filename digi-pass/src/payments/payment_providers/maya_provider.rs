@@ -70,8 +70,8 @@ fn basket_item_to_item(basket_item: &BasketItem) -> Option<checkout::request::It
         return None;
     }
     let line_item = Item::new(
-        basket_item.basketed_inventories[0].price as f64 / 100.00,
-        basket_item.basketed_inventories.len().to_string(),
+        basket_item.total_price as f64 / 100.00,
+        1.to_string(),
         basket_item.total_price as f64 / 100.00,
         basket_item.basketed_inventories[0].name.to_string(),
         basket_item.basketed_inventories[0].event_id.to_string(),
