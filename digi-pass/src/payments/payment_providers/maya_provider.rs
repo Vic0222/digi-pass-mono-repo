@@ -35,7 +35,7 @@ impl PaymentProvider for MayaProvider {
         let client = reqwest::Client::new();
         let items:Vec<Item> = basket.basket_items.iter().filter_map(basket_item_to_item).collect();
         let request = checkout::request::CheckoutRequest::new(
-            basket.total_price as f64 / 100.0,
+            basket.price as f64 / 100.0,
             "PHP".to_string(),
             basket.id.to_string(),
             items,
@@ -70,9 +70,9 @@ fn basket_item_to_item(basket_item: &BasketItem) -> Option<checkout::request::It
         return None;
     }
     let line_item = Item::new(
-        basket_item.basketed_inventories[0].price as f64 / 100.00,
-        basket_item.basketed_inventories.len().to_string(),
-        basket_item.total_price as f64 / 100.00,
+        basket_item.price as f64 / 100.00,
+        1.to_string(),
+        basket_item.price as f64 / 100.00,
         basket_item.basketed_inventories[0].name.to_string(),
         basket_item.basketed_inventories[0].event_id.to_string(),
         basket_item.basketed_inventories[0].name.to_string(),

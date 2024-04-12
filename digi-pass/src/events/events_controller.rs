@@ -3,7 +3,7 @@ use std::sync::Arc;
 use axum::{extract::State, Json};
 use crate::{app_state::AppState, validation::ValidatedJson, AppError};
 
-use super::{application::EventService, data_transfer_objects::{CreateEvent, CreateEventResult, EventDetails}};
+use super::data_transfer_objects::{CreateEvent, CreateEventResult, EventDetails};
 
 pub async fn create(
     State(state): State<Arc<AppState>>,

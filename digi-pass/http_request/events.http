@@ -115,7 +115,7 @@ POST {{baseUrl}}/payments/webhook/maya
 Content-Type: application/json
 
 {
-  "id": "e732f996-cb87-4120-b712-166d8183c01d",
+  "id": "35b25be8-7430-4075-bd1f-32ae78a0e2c3",
   "isPaid": true,
   "status": "PAYMENT_SUCCESS",
   "amount": "10",
@@ -149,4 +149,14 @@ Content-Type: application/json
   "approvalCode": "00001234",
   "receiptNumber": "18976ad0a321",
   "requestReferenceNumber":"ABC000001"
+}
+
+###
+POST {{baseUrl}}/baskets/purchase
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+x-api-key: {{api_key}}
+
+{
+    "basket_id" : "{{CreateBasket.response.body.$.basket_id}}"
 }

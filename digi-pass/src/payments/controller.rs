@@ -4,7 +4,7 @@ use axum::{extract::State, Json};
 
 use crate::{app_state::AppState, validation::ValidatedJson, AppError};
 
-use super::{application::PaymentService, data_transfer_objects::{maya_webhook::MayaWebhookRequest, CheckoutRequest, CheckoutResponse}, webhook_handlers};
+use super::{data_transfer_objects::{maya_webhook::MayaWebhookRequest, CheckoutRequest, CheckoutResponse}, webhook_handlers};
 
 pub async fn checkout(
     State(state): State<Arc<AppState>>,
