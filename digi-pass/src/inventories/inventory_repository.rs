@@ -1,7 +1,5 @@
 use std::str::FromStr;
 
-use crate::inventories::constants::INVENTORY_STATUS_AVAILABLE;
-
 use super::data_models::{GenerateInventory, Inventory};
 use async_trait::async_trait;
 use bson::{doc, oid::ObjectId};

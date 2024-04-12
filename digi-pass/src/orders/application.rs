@@ -26,7 +26,7 @@ impl OrderService {
 
     pub async fn create_order(&self, basket: Basket) -> anyhow::Result<String> {
         let order_id = match basket.original_order_id {
-            Some(id) => ObjectId::parse_str(id).map_err(|e| anyhow!("Invalid Original Order Id"))?,
+            Some(id) => ObjectId::parse_str(id).map_err(|_| anyhow!("Invalid Original Order Id"))?,
             None => ObjectId::new(),
         }; 
         let order_transaction_id = ObjectId::new();
