@@ -12,7 +12,6 @@ pub trait BasketRepository : Send + Sync  {
     async fn get (&self, id: &str) -> anyhow::Result<Option<Basket>>;
 }
 
-
 #[derive(Clone)]
 pub struct  MongoDbBasketRepository {
     pub client: Client,

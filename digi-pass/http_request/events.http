@@ -115,7 +115,7 @@ POST {{baseUrl}}/payments/webhook/maya
 Content-Type: application/json
 
 {
-  "id": "1461e899-3f98-4ae4-96af-67c3c51eaf94",
+  "id": "35b25be8-7430-4075-bd1f-32ae78a0e2c3",
   "isPaid": true,
   "status": "PAYMENT_SUCCESS",
   "amount": "10",
