@@ -67,7 +67,7 @@ impl PaymentService {
 
         let payment = Payment::new(
             Some(ObjectId::from_str(&basket.id)?),
-            basket.total_price,
+            basket.price,
             CURRENCY.to_string(),
             self.payment_provider.get_name(),
             PAYMENT_STATUS_PENDING.to_string(),

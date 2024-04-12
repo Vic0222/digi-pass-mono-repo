@@ -4,6 +4,8 @@ use chrono::Utc;
 use mongodb::Client;
 
 use crate::events::{application::EventService, data_transfer_objects::EventDetails};
+use crate::orders::application::OrderService;
+use crate::payments::data_transfer_objects::PaymentView;
 use crate::{
     inventories::{
         application::InventoryService,
@@ -114,7 +116,7 @@ impl BasketService {
                 if is_basket_expired(&basket) {
                     return Ok(None);
                 }
-                Ok(Some(map_dto_basket_from_data_basket(&basket)?))
+                Ok(Some(map_dto_basket_from_data_basket(&basket, vec![])?))
             }
         }
     }
@@ -122,8 +124,9 @@ impl BasketService {
     pub async fn purchase_basket(
         &self,
         payment_service: &PaymentService,
+        order_service: &OrderService,
         basket_id: &str,
-    ) -> anyhow::Result<()> {
+    ) -> anyhow::Result<String> {
         let basket = self.basket_repository.get(basket_id).await?;
 
         let basket = basket.ok_or(anyhow::anyhow!("Basket not found"))?;
@@ -149,7 +152,11 @@ impl BasketService {
         if paid_payments < compute_basket_total_price(&basket) {
             return Err(anyhow::anyhow!("Basket not fully paid."));
         }
-        todo!("Convert basket to order");
+        let basket_dto = map_dto_basket_from_data_basket(&basket, basket_payments)?;
+        
+        let order_id = order_service.create_order(basket_dto).await?;
+
+        return Ok(order_id);
     }
 }
 
@@ -169,13 +176,14 @@ fn compute_basket_total_price(basket: &Basket) -> i32 {
 
 fn map_dto_basket_from_data_basket(
     data_basket: &data_models::Basket,
+    payments: Vec<PaymentView>,
 ) -> anyhow::Result<data_transfer_objects::Basket> {
-    let mut total_price = 0;
+    let mut price = 0;
     let mut basket_items = vec![];
 
     for basket_item in data_basket.basket_items.iter() {
 
-        total_price += basket_item.price;
+        price += basket_item.price;
 
         let dto_basket_item = data_transfer_objects::BasketItem {
             basketed_inventories: basket_item
@@ -190,7 +198,7 @@ fn map_dto_basket_from_data_basket(
                     },
                 )
                 .collect(),
-            total_price: basket_item.price,
+            price: basket_item.price,
         };
         basket_items.push(dto_basket_item);
     }
@@ -200,13 +208,26 @@ fn map_dto_basket_from_data_basket(
             .id
             .map(|id| id.to_hex())
             .ok_or(anyhow::anyhow!("No basket id!"))?,
+        original_order_id: None,
         valid_until: data_basket.valid_until,
         basket_items,
-        total_price,
+        price,
+        payments: payments.iter().map(payment_view_to_basket_payment).collect(),
     };
     Ok(dto_basket)
 }
 
+fn payment_view_to_basket_payment(payment_view: &PaymentView) -> data_transfer_objects::BasketPayment {
+    data_transfer_objects::BasketPayment {
+        id: payment_view.id.clone(),
+        created_at: payment_view.created_at,
+        status: payment_view.status.clone(),
+        amount: payment_view.amount,
+        currency: payment_view.currency.clone(),
+        provider: payment_view.provider.clone(),
+        payment_type: payment_view.payment_type.clone(),
+    }
+}
 fn is_all_inventory_reserved(basket: &Basket) -> bool {
     for basket_item in basket.basket_items.iter() {
         for basketed_inventory in basket_item.basketed_inventories.iter() {

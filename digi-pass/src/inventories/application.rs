@@ -7,7 +7,7 @@ use chrono::Utc;
 use mongodb::Client;
 use crate::events::application::EventService;
 
-use super::constants::{GENERATE_INVENTORY_STATUS_PENDING, INVENTORY_STATUS_AVAILABLE};
+use super::constants::{GENERATE_INVENTORY_STATUS_PENDING, INVENTORY_STATUS_AVAILABLE, INVENTORY_STATUS_RESERVED};
 use super::data_models::{GenerateInventory, Inventory};
 use super::data_transfer_objects::{
     CreateInventoryBatch, GenerateInventory as GenerateInventoryDto,
@@ -57,12 +57,13 @@ impl InventoryService {
         
         let now = Utc::now();
         let reserved_until = now + chrono::Duration::minutes(90);
-        let mut inventories = self.inventory_repository.get_unreserved_inventories(reserve_inventories.event_id.clone(), reserve_inventories.quantity, now).await?;
+        let mut inventories = self.inventory_repository.get_unreserved_inventories(reserve_inventories.event_id.clone(), reserve_inventories.quantity, now, INVENTORY_STATUS_AVAILABLE).await?;
         if inventories.len()  != reserve_inventories.quantity as usize {
             return Err(anyhow::anyhow!("Not enough inventories: {:?}", inventories.len()));
         }
         for inventory in inventories.iter_mut() {
             inventory.reserved_until = reserved_until;
+            inventory.status = INVENTORY_STATUS_RESERVED.to_string();
         }
         self.inventory_repository.batch_update_reservations(&inventories).await?;
         Ok(ReserveInventoriesResult {

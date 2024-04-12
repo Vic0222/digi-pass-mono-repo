@@ -23,15 +23,17 @@ pub struct CreateBasketResult {
 #[derive(Serialize, Default, Debug)]
 pub struct Basket {
     pub id: String,
+    pub original_order_id: Option<String>,
     pub valid_until: DateTime<Utc>,
     pub basket_items: Vec<BasketItem>,
-    pub total_price: i32,
+    pub payments: Vec<BasketPayment>,
+    pub price: i32,
 }
 
 #[derive(Serialize, Default, Debug)]
 pub struct BasketItem{
     pub basketed_inventories: Vec<BasketedInventory>,
-    pub total_price: i32,
+    pub price: i32,
 }
 
 #[derive(Serialize, Default, Debug)]
@@ -40,6 +42,17 @@ pub struct BasketedInventory{
     pub name: String,
     pub inventory_id: String,
     pub reserved_until: DateTime<Utc>,
+}
+
+#[derive(Serialize, Default, Debug)]
+pub struct BasketPayment {
+    pub id: String,
+    pub amount: i32,
+    pub currency: String,
+    pub provider: String,
+    pub status: String,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+    pub payment_type: String,
 }
 
 #[derive(Debug, Validate, Deserialize)]
@@ -52,3 +65,4 @@ pub struct PurchaseBasketRequest {
 pub struct  PurchaseBasketResult {
     pub order_id: String
 }
+

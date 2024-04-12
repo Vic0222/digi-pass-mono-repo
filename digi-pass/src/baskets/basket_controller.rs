@@ -20,6 +20,6 @@ pub async fn post_purchase(
     State(state): State<Arc<AppState>>,
     ValidatedJson(data): ValidatedJson<PurchaseBasketRequest>,
 ) -> Result<Json<PurchaseBasketResult>, AppError> {
-    state.basket_service.purchase_basket(&state.payment_service, &data.basket_id).await?;
-    todo!()
+    let result = state.basket_service.purchase_basket(&state.payment_service, &state.order_service, &data.basket_id).await?;
+    return  Ok(Json(PurchaseBasketResult { order_id: result }));
 }

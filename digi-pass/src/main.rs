@@ -22,7 +22,7 @@ use tower_http::trace::{self, TraceLayer};
 use tracing::Level;
 use tracing_subscriber::EnvFilter;
 
-use crate::{app_state::AppState, payments::application::PaymentService};
+use crate::{app_state::AppState, orders::application::OrderService, payments::application::PaymentService};
 use crate::inventories::application::InventoryService;
 use crate::events::application::EventService;
 use crate::baskets::application::BasketService;
@@ -77,9 +77,6 @@ async fn main() {
         .compact().init();
     }
     
-
-    
-    
     load_secrets().await.expect("Failed loading secrets");
 
     let issuer = env::var("JwtConfig__Issuer").expect("Jwt issuer not found");
@@ -119,11 +116,14 @@ async fn main() {
 
     let payment_service = PaymentService::new(basket_service.clone(), maya_base_url, maya_secret_base64, client.clone(), database.clone() );
     
+    let order_service = OrderService::new(client.clone(), database.clone());
+
     let state = Arc::new(AppState {
         event_service,
         inventory_service,
         basket_service,
-        payment_service
+        payment_service,
+        order_service
     });
 
     // build our application with a route
