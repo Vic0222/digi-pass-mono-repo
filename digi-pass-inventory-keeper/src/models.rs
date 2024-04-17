@@ -1,7 +1,7 @@
 use bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct Inventory {
     #[serde(rename = "_id", )]
     pub id: ObjectId,
@@ -10,6 +10,13 @@ pub struct Inventory {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct InventoryUpdate {
+    pub id: ObjectId,
+    pub status: String,
+    pub concurrency_stamp: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct OrderTransaction {
     #[serde(rename = "_id", )]
     pub id: ObjectId,
@@ -20,7 +27,7 @@ pub struct OrderTransaction {
     pub created_at: chrono::DateTime<chrono::Utc>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct OrderTransactionItem {
     pub id: String,
     pub created_at: chrono::DateTime<chrono::Utc>,
@@ -28,7 +35,7 @@ pub struct OrderTransactionItem {
     pub inventories: Vec<OrderTransactionItemInventory>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct OrderTransactionItemInventory {
     pub inventory_id: ObjectId,
     pub event_id: ObjectId,
