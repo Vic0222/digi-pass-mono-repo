@@ -1,11 +1,9 @@
-mod internals;
+
 use bson::{doc, oid::ObjectId};
 use chrono::{DateTime, Utc};
 use mongodb::{options::FindOptions, Client, ClientSession, Collection};
-use futures_util::FutureExt;
 use crate::models::{Inventory, InventoryUpdate, OrderTransaction};
 
-use self::internals::UpdateInventoriesContext;
 
 pub struct InventoryRepository {
     client: Client,
@@ -53,32 +51,27 @@ impl InventoryRepository {
     }
     
     pub async fn update_inventory_status(&self, inventory_updates: Vec<InventoryUpdate>) -> anyhow::Result<()>{
-        let context = UpdateInventoriesContext { database: self.database.clone(), collecion: self.collection.clone(), inventory_updates: &inventory_updates};
-        let _ = self.client.start_session(None).await?
-            .with_transaction(context,  |session, context|batch_update_inventory_status(session, context).boxed(), None).await?;
+        let collection = self.get_collection();
+        for inventory_update in inventory_updates.iter() {
+            tracing::info!("updating inventory: {:?}", inventory_update);
+            
+            let update_result = collection.find_one_and_update(
+                doc! {"_id": &inventory_update.id, "concurrency_stamp":&inventory_update.concurrency_stamp },
+                doc! {"$set": {"status": &inventory_update.status, "concurrency_stamp": ObjectId::new().to_hex()}},
+                None
+            ).await;
+            if update_result.is_err() {
+                tracing::error!("Error updating inventory status: {:?}", update_result.err());
+            }
+        }
+
         Ok(())
     }
 
 
 }
 
-async fn batch_update_inventory_status(session: &mut ClientSession, context: &mut UpdateInventoriesContext<'_>) -> anyhow::Result<(), mongodb::error::Error> {
-    let inventory_collection = session
-        .client()
-        .database(&context.database)
-        .collection::<Inventory>(&context.collecion);
-    for inventory in  context.inventory_updates{
-        inventory_collection
-            .find_one_and_update_with_session(
-                doc! {"_id": &inventory.id, "concurrency_stamp":&inventory.concurrency_stamp },
-                doc! {"$set": {"status": &inventory.status, "concurrency_stamp": ObjectId::new().to_hex()}},
-                None,
-                session
-            )
-            .await?;
-    }
-    Ok(())
-}
+
 pub struct OrderTransactionRepository {
     client: Client,
     database: String,
