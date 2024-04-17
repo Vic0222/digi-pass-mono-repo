@@ -9,7 +9,7 @@ use dotenvy::dotenv;
 use mongodb::Client;
 use tracing_subscriber::fmt;
 
-use crate::{application::InventoryKeeperService, persistence::InventoryRepository};
+use crate::{application::InventoryKeeperService, persistence::{InventoryRepository, OrderTransactionRepository}};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()>{
@@ -32,8 +32,9 @@ async fn main() -> anyhow::Result<()>{
     
     tracing_subscriber::fmt().event_format(format).init();
     tracing::info!("Starting Inventory Keeper!");
-    let inventory_repository = InventoryRepository::new(client, database, "Inventories".to_string());
-    let keeper_service = InventoryKeeperService::new(inventory_repository);
+    let inventory_repository = InventoryRepository::new(client.clone(), database.clone(), "Inventories".to_string());
+    let order_transaction_repository = OrderTransactionRepository::new(client.clone(), database.clone(), "OrderTransactions".to_string());
+    let keeper_service = InventoryKeeperService::new(inventory_repository, order_transaction_repository);
 
     //we probably want to add a retry mechanism here
     keeper_service.do_inventory_keeping().await.unwrap();
