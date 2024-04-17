@@ -99,7 +99,7 @@ async fn batch_update_reservations_internal(session: &mut ClientSession, context
         inventory_collection
             .find_one_and_update_with_session(
                 doc! {"_id": &inventory.id, "concurrency_stamp":&inventory.concurrency_stamp },
-                doc! {"$set": {"status": &inventory.status,"last_reservation": inventory.reserved_until, "concurrency_stamp": ObjectId::new().to_hex()}},
+                doc! {"$set": {"status": &inventory.status,"reserved_until": inventory.reserved_until, "concurrency_stamp": ObjectId::new().to_hex()}},
                 None,
                 session
             )
