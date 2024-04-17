@@ -1,0 +1,71 @@
+name: Deploy inventory keeper
+
+on:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    defaults:
+      run:
+        working-directory: ./digi-pass-inventory-keeper
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        profile: minimal
+        override: true
+
+    - name: Cache cargo registry
+      uses: actions/cache@v3
+      continue-on-error: false
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: cargo-build-cache
+    - name: Install libssl
+      run: |
+          sudo apt install libssl-dev
+          sudo apt install pkg-config
+          sudo apt install libudev-dev
+      
+    - name: Build lambda
+      run: |
+          pip install cargo-lambda
+          cargo lambda build --release --arm64 
+    - uses: actions/upload-artifact@v4
+      with:
+        name: lambda
+        path: ./digi-pass-inventory-keeper/target/lambda/
+
+  deploy:
+    needs: build
+    defaults:
+      run:
+        working-directory: ./aws/digi-pass-inventory-keeper/
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Configure AWS credentials
+      id: creds
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.REGION }}
+    - uses: actions/download-artifact@v4.1.4
+      with: 
+        path: ./digi-pass-inventory-keeper/target/
+    - name: Deploy lambda
+      run: |
+          tree
+          aws cloudformation package  --template ./template.yml --s3-bucket digipass.deployment --output-template-file packaged-template.yml
+          aws cloudformation update-stack --stack-name digi-pass-inventory-keeper --template-body file://packaged-template.yml --capabilities CAPABILITY_AUTO_EXPAND CAPABILITY_NAMED_IAM CAPABILITY_IAM
