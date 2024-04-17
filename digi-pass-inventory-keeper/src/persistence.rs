@@ -1,7 +1,7 @@
 
 use bson::{doc, oid::ObjectId};
 use chrono::{DateTime, Utc};
-use mongodb::{options::FindOptions, Client, ClientSession, Collection};
+use mongodb::{options::FindOptions, Client, Collection};
 use crate::models::{Inventory, InventoryUpdate, OrderTransaction};
 
 
