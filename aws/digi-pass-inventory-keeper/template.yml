@@ -54,8 +54,8 @@ Resources:
         Scheduled:
           Type: Schedule
           Properties:
-            Schedule: 'cron(0/30 * * * ? *)'
+            Schedule: 'cron(0 0 * * ? *)'
             Name: HalfHour
             Description: HalfHour
-            Enabled: true
+            Enabled: false
 
