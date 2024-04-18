@@ -50,9 +50,6 @@ Resources:
         Variables:
           MongoDbConfig__Database: DigiPassDb
           RUST_LOG: "debug"
-      DeadLetterQueue:
-        TargetArn: !GetAtt InventoryKeeperDLQueue.Arn
-        Type: SQS
       Events:
         Scheduled:
           Type: Schedule
