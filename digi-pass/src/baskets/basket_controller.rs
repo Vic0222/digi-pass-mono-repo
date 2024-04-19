@@ -1,12 +1,12 @@
 use std::sync::Arc;
-
+use crate::error::AppError;
 use axum::{extract::State, Json};
 
-use crate::{app_state::AppState, validation::ValidatedJson, AppError};
+use crate::{app_state::AppState, validation::ValidatedJson};
 
-use super::data_transfer_objects::{
+use super::{data_transfer_objects::{
     CreateBasketRequest, CreateBasketResult, PurchaseBasketRequest, PurchaseBasketResult,
-};
+}, errors::BasketError};
 
 pub async fn create(
     State(state): State<Arc<AppState>>,
@@ -19,7 +19,9 @@ pub async fn create(
 pub async fn post_purchase(
     State(state): State<Arc<AppState>>,
     ValidatedJson(data): ValidatedJson<PurchaseBasketRequest>,
-) -> Result<Json<PurchaseBasketResult>, AppError> {
+) -> Result<Json<PurchaseBasketResult>, BasketError> {
     let result = state.basket_service.purchase_basket(&state.payment_service, &state.order_service, &data.basket_id).await?;
+
     return  Ok(Json(PurchaseBasketResult { order_id: result }));
 }
+

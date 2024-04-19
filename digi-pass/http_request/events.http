@@ -158,5 +158,5 @@ Content-Type: application/json
 x-api-key: {{api_key}}
 
 {
-    "basket_id" : "{{CreateBasket.response.body.$.basket_id}}"
+    "basket_id" : "66026740faddba649fd81f89"
 }

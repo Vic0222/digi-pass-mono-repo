@@ -14,6 +14,7 @@ use crate::{
     payments::application::PaymentService,
 };
 
+use super::errors::BasketErrors;
 use super::{
     basket_repository::{BasketRepository, MongoDbBasketRepository},
     data_models::{self, Basket, BasketItem, BasketedInventory},
@@ -129,12 +130,12 @@ impl BasketService {
     ) -> anyhow::Result<String> {
         let basket = self.basket_repository.get(basket_id).await?;
 
-        let basket = basket.ok_or(anyhow::anyhow!("Basket not found"))?;
+        let basket = basket.ok_or(BasketErrors::BasketNotFound)?;
         if !is_all_inventory_reserved(&basket) {
-            return Err(anyhow::anyhow!("Not all inventory reserved"));
+            return Err(BasketErrors::BasketExpired.into());
         }
         if is_basket_expired(&basket) {
-            return Err(anyhow::anyhow!("Basket expired"));
+            return Err(BasketErrors::BasketExpired.into());
         }
 
         let basket_payments = payment_service.get_basket_payments(basket_id).await?;
@@ -150,7 +151,7 @@ impl BasketService {
             })
             .sum();
         if paid_payments < compute_basket_total_price(&basket) {
-            return Err(anyhow::anyhow!("Basket not fully paid."));
+            return Err(BasketErrors::BasketUnpaid.into());
         }
         let basket_dto = map_dto_basket_from_data_basket(&basket, basket_payments)?;
         

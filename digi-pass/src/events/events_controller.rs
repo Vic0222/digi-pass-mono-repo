@@ -1,7 +1,7 @@
 use std::sync::Arc;
-
+use crate::error::AppError;
 use axum::{extract::State, Json};
-use crate::{app_state::AppState, validation::ValidatedJson, AppError};
+use crate::{app_state::AppState, validation::ValidatedJson};
 
 use super::data_transfer_objects::{CreateEvent, CreateEventResult, EventDetails};
 
