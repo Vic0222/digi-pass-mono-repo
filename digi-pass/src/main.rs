@@ -15,7 +15,7 @@ use lambda_http::run;
 use dotenv::dotenv;
 
 use axum::{
-    http::StatusCode, response::{IntoResponse, Response}, routing::{get, post}, Json, Router
+    routing::{get, post}, Json, Router
 };
 use mongodb::Client;
 use serde::Serialize;
