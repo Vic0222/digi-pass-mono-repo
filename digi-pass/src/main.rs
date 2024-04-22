@@ -5,6 +5,7 @@ mod validation;
 mod baskets;
 mod payments;
 mod orders;
+mod passes;
 pub mod error;
 pub mod helpers;
 
