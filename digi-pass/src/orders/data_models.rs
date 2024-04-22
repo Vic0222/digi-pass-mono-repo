@@ -35,6 +35,7 @@ pub struct OrderTransactionItem {
 
 #[derive(Serialize, Deserialize)]
 pub struct OrderTransactionItemInventory {
+    pub id: String,
     pub inventory_id: ObjectId,
     pub event_id: ObjectId,
     pub name: String,

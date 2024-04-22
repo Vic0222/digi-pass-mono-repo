@@ -15,6 +15,7 @@ bson = { version = "2.9.0", features = ["chrono-0_4", "serde_with"] }
 chrono = { version = "0.4.34", features = ["serde"] }
 dotenv = "0.15.0"
 futures-util = "0.3.30"
+jsonwebtoken = "=9.3.0"
 jwt-authorizer = { version = "0.14.0", features = ["native-tls-vendored"] }
 lambda_http = "0.10.0"
 mongodb = "2.8.1"

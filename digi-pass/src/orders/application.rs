@@ -34,9 +34,12 @@ impl OrderService {
         let mut items = vec![];
         let mut index = 1;
         for basket_item in basket.basket_items {
+            let order_transaction_item_id = format!("{}-{}", order_transaction_id, index);
             let mut inventories = vec![];
+            let mut order_transaction_item_inventory_index = 1; 
             for basketed_inventory in basket_item.basketed_inventories {
                 let inventory = OrderTransactionItemInventory {
+                    id: format!("{}-{}", order_transaction_item_id, order_transaction_item_inventory_index),
                     inventory_id: ObjectId::parse_str(basketed_inventory.inventory_id)?,
                     event_id: ObjectId::parse_str(basketed_inventory.event_id)?,
                     name: basketed_inventory.name,
@@ -44,10 +47,11 @@ impl OrderService {
                 };
 
                 inventories.push(inventory);
+                order_transaction_item_inventory_index += 1;
             }
 
             let item = OrderTransactionItem {
-                id: format!("{}-{}", order_transaction_id, index),
+                id: order_transaction_item_id,
                 created_at: Utc::now(),
                 price: basket_item.price,
                 inventories

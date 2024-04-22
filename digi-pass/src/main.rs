@@ -24,7 +24,7 @@ use tower_http::trace::{self, TraceLayer};
 use tracing::Level;
 use tracing_subscriber::EnvFilter;
 
-use crate::{app_state::AppState, orders::application::OrderService, payments::application::PaymentService};
+use crate::{app_state::AppState, orders::application::OrderService, passes::application::PassService, payments::application::PaymentService};
 use crate::inventories::application::InventoryService;
 use crate::events::application::EventService;
 use crate::baskets::application::BasketService;
@@ -120,12 +120,15 @@ async fn main() {
     
     let order_service = OrderService::new(client.clone(), database.clone());
 
+    let pass_service = PassService::new()
+    ;
     let state = Arc::new(AppState {
         event_service,
         inventory_service,
         basket_service,
         payment_service,
-        order_service
+        order_service,
+        pass_service
     });
 
     // build our application with a route
@@ -161,6 +164,10 @@ async fn main() {
         .route(
             "/payments/checkout",
             post(self::payments::controller::checkout),
+        )
+        .route(
+            "/passes/:order_transaction_item_inventory_id",
+            get(self::passes::passes_controller::get),
         )
         .layer(jwt_auth.into_layer())
         .route(
