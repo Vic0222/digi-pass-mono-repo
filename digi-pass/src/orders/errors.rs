@@ -3,38 +3,38 @@ use axum::http::StatusCode;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum PassErrors {
+pub enum OrderErrors {
     #[error("{0}")]
     Unknown(#[from] anyhow::Error)
 }
 
-pub struct PassError {
-    pub error: PassErrors,
+pub struct OrderError {
+    pub error: OrderErrors,
 }
 
 
-// Tell axum how to convert `PassErrors` into a response.
-impl IntoResponse for PassError {
+// Tell axum how to convert `OrderErrors` into a response.
+impl IntoResponse for OrderError {
     fn into_response(self) -> Response {
         let status_code = match &self.error {
-            PassErrors::Unknown(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            OrderErrors::Unknown(_) => StatusCode::INTERNAL_SERVER_ERROR,
         };
 
         (status_code, format!("{}", self.error)).into_response()
     }
 }
 
-impl From<anyhow::Error> for PassError
+impl From<anyhow::Error> for OrderError
 {
     fn from(err: anyhow::Error) -> Self {
-        match err.downcast::<PassErrors>() {
+        match err.downcast::<OrderErrors>() {
             Ok(err) => 
             Self {
                 error: err,
             },
             Err(err) => 
             Self {
-                error: PassErrors::Unknown(err).into(),
+                error: OrderErrors::Unknown(err).into(),
             },
         }
     }

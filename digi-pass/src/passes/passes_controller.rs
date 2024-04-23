@@ -1,18 +1,25 @@
 use std::sync::Arc;
-use crate::error::AppError;
-use axum::{extract::{Path, State}, Json};
+use axum::{extract::{Path, State}, response::IntoResponse, Json};
+use reqwest::StatusCode;
 use crate::app_state::AppState;
 
-use super::data_transfer_objects::JwtPass;
+use super::errors::PassError;
 
 
 pub async fn get(
     State(state): State<Arc<AppState>>,
     Path(order_transaction_item_inventory_id): Path<String>,
-) -> Result<Json<JwtPass>, AppError>  {
-    let jwt_pass = state.pass_service.get_pass("".to_string()).await?;
+) -> impl IntoResponse  {
+    let result = state.pass_service.get_pass(&state.order_service, order_transaction_item_inventory_id.clone()).await;
 
-    // this will be converted into a JSON response
-    // with a status code of `201 Created`
-    Ok(Json(jwt_pass))
+    match result {
+        Ok(jwt_pass) => {
+            if let Some(jwt_pass) = jwt_pass {
+                (StatusCode::OK, Json(jwt_pass)).into_response()
+            }else{
+                (StatusCode::NOT_FOUND).into_response()
+            }
+        },
+        Err(err) => PassError::from(err).into_response(),
+    }
 }
