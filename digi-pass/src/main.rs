@@ -59,6 +59,38 @@ pub async fn load_secrets() -> anyhow::Result<()> {
     Ok(())
 }
 
+pub async fn load_secrets_from_ssm() -> anyhow::Result<()> {
+    
+    if !is_running_in_lambda() {
+        tracing::info!("Not in lambda, not loading secrets");
+        return Ok(())
+    }
+    tracing::debug!("Loading Secrets:");
+    let config = aws_config::load_from_env().await;
+    let client = aws_sdk_ssm::Client::new(&config);
+   
+   let resp = client.get_parameters_by_path()
+    .path("/DigiPass")
+    .with_decryption(true).send().await?;
+
+    if resp.parameters.is_none() {
+        tracing::info!("No parameters found");
+        return Ok(());
+    }
+
+    
+    for parameter in resp.parameters() {
+        if let Some(name) = parameter.name() {
+            tracing::debug!("parameter found: {:?}", name);
+            let name = name.replace("/DigiPass/", "");
+            if let Some(value) = parameter.value() {
+                env::set_var(name, value);
+            }
+        }
+    }
+    Ok(())
+}
+
 fn is_running_in_lambda() -> bool {
     env::var("AWS_LAMBDA_FUNCTION_NAME").is_ok()
 }
@@ -120,8 +152,9 @@ async fn main() {
     
     let order_service = OrderService::new(client.clone(), database.clone());
 
-    let pass_service = PassService::new()
-    ;
+    let pass_private_key = env::var("PassPrivateKey").expect("Pass private key not found").to_string();
+    let pass_service = PassService::new(pass_private_key).expect("Failed creating PassService");
+
     let state = Arc::new(AppState {
         event_service,
         inventory_service,

@@ -1,3 +1,6 @@
+use std::{fs, str::from_utf8};
+
+use base64::{engine::general_purpose::STANDARD, Engine as _};
 use chrono::Utc;
 use jsonwebtoken::{encode, EncodingKey, Header};
 
@@ -6,15 +9,29 @@ use crate::orders::{application::OrderService, data_transfer_objects::OrderTrans
 use super::{data_models::Pass, data_transfer_objects::JwtPass};
 
 pub struct PassService{
-
+    encoding_key: EncodingKey,
 }
 
 impl PassService {
     
-    pub fn new() -> Self {
-        PassService{}
+    
+    pub fn new(pass_private_key: String) -> anyhow::Result<Self> {
+
+        let private_key = STANDARD.decode(&pass_private_key)
+            .map_err(|_| anyhow::anyhow!("Failed decoding private key"))?;
+
+        let private_key = from_utf8(&private_key)
+            .map_err(|_| anyhow::anyhow!("Failed decoding private key"))?;
+            
+        let encoding_key = EncodingKey::from_rsa_pem(&private_key.as_bytes())?; // IMPROVEMENT:  Get from Key Management Service
+        Ok(Self {
+            encoding_key,
+        })
     }
 
+    
+    ///converet a purhased inventory to a jwt pass
+    /// TODO: get key from a Key Management Service
     pub async fn get_pass(&self, order_service: &OrderService, order_transaction_item_inventory_id: String) ->anyhow::Result<Option<JwtPass>> {
 
         //get order
@@ -34,18 +51,17 @@ impl PassService {
         }else{
             return Ok(None);
         };
-        
-        
 
         let pass = if let Some(pass) = assemble_pass(&order_transaction_item_inventory_id, &order_transaction){
             pass
         }else{
             return Ok(None);
         };
+
         //Intentionally left unused so I it will warn;
-        let header = Header::default();//TODO convert to RS256
-        let from_secret = EncodingKey::from_secret("secret".as_ref()); // TODO get from storage. Maybe a database.
-        let token = encode(&header, &pass, &from_secret)?;
+        let header = Header::new(jsonwebtoken::Algorithm::RS256);
+
+        let token = encode(&header, &pass, &self.encoding_key)?;
 
         Ok(Some(JwtPass::new(token)))
     }
@@ -69,3 +85,47 @@ fn assemble_pass(order_transaction_item_inventory_id: &str, order_transaction: &
 
         Some(pass)
 }
+
+
+// pub fn convert_rsa_key_to_jwks(pub_key: &str) -> anyhow::Result<Jwks> {
+
+//     use pem::parse;
+//     use ring::signature::RsaKeyPair;
+
+//     let pem = parse(pub_key)?;
+//     let rsa_keys = RsaKeyPair::from_public_key(&pem.contents)?;
+
+//     let jwks = Jwks {
+//         keys: vec![Jwk {
+//             kty: "RSA".to_string(),
+//             alg: "RS256".to_string(),
+//             e: base64::encode(&rsa_keys.public_key().e().to_vec()),
+//             n: base64::encode(&rsa_keys.public_key().n().to_vec()),
+//             kid: None,
+//             kty: None,
+//             use_: None,
+//             key_ops: None,
+//             alg: None,
+//         }],
+//     };
+
+//     Ok(jwks)
+// }
+
+// pub struct Jwks {
+//     pub keys: Vec<Jwk>,
+// }
+
+// pub struct Jwk {
+//     pub kty: String,
+//     pub alg: String,
+//     pub e: String,
+//     pub n: String,
+//     pub kid: Option<String>,
+//     pub kty: Option<String>,
+//     pub use_: Option<String>,
+//     pub key_ops: Option<Vec<String>>,
+//     pub alg: Option<String>,
+// }
+
+
