@@ -42,7 +42,8 @@ fn is_running_in_lambda() -> bool {
     env::var("AWS_LAMBDA_FUNCTION_NAME").is_ok()
 }
 
-pub async fn load_secrets() -> anyhow::Result<()> {
+
+pub async fn load_secrets_from_ssm() -> anyhow::Result<()> {
     
     if !is_running_in_lambda() {
         tracing::info!("Not in lambda, not loading secrets");
@@ -50,18 +51,25 @@ pub async fn load_secrets() -> anyhow::Result<()> {
     }
     tracing::debug!("Loading Secrets:");
     let config = aws_config::load_from_env().await;
-    let client = aws_sdk_secretsmanager::Client::new(&config);
-    let filter = Filter::builder().key("name".into()).values("DigiPass__").build();
-    let resp = client.list_secrets().filters(filter).send().await?;
-    let secrets = resp.secret_list();
-    tracing::debug!("Loading Secrets 222: {:?}", secrets);
-    for secret in secrets {
-        
-        tracing::debug!("Secret found: {:?}", secret.name());
-        if let Some(name) = secret.name() {
-            let resp = client.get_secret_value().secret_id(name).send().await?;
-            let name = name.replace("DigiPass__", "");
-            env::set_var(&name, resp.secret_string().ok_or(anyhow::anyhow!("Failed getting secret"))?);
+    let client = aws_sdk_ssm::Client::new(&config);
+   
+   let resp = client.get_parameters_by_path()
+    .path("/DigiPass")
+    .with_decryption(true).send().await?;
+
+    if resp.parameters.is_none() {
+        tracing::info!("No parameters found");
+        return Ok(());
+    }
+
+    
+    for parameter in resp.parameters() {
+        if let Some(name) = parameter.name() {
+            tracing::debug!("parameter found: {:?}", name);
+            let name = name.replace("/DigiPass/", "");
+            if let Some(value) = parameter.value() {
+                env::set_var(name, value);
+            }
         }
     }
     Ok(())

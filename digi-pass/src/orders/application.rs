@@ -7,7 +7,7 @@ use mongodb::Client;
 
 use crate::{baskets::data_transfer_objects::Basket, orders::data_models::{OrderTransaction, OrderTransactionItem, OrderTransactionItemInventory, OrderTransactionPayment}};
 
-use super::persistence::{MongoDbOrderTransactionRepository, OrderTransactionRepository};
+use super::{data_transfer_objects, persistence::{MongoDbOrderTransactionRepository, OrderTransactionRepository}};
 
 pub struct  OrderService {
     order_transaction_repository: Arc<dyn OrderTransactionRepository>,
@@ -24,6 +24,26 @@ impl OrderService {
         }
     }
 
+    pub async fn get_order_transactions(&self, order_transaction_id: String) -> anyhow::Result<Option<data_transfer_objects::OrderTransaction>> {
+
+        let object_id  = match ObjectId::parse_str(&order_transaction_id)  {
+            Ok(object_id) => object_id,
+            Err(_) => {
+                tracing::error!("Failed to parse ObjectId");
+                return Ok(None);
+            },
+        };
+        
+        let order_transaction = self.order_transaction_repository.get(object_id).await?;
+        let order_transaction =if let Some(order_transaction) = order_transaction {
+            order_transaction
+        }else {
+            return  Ok(None);
+        };
+
+        Ok(Some(mpa_order_transaction_to_dto(order_transaction)))
+    }
+
     pub async fn create_order(&self, basket: Basket) -> anyhow::Result<String> {
         let order_id = match basket.original_order_id {
             Some(id) => ObjectId::parse_str(id).map_err(|_| anyhow!("Invalid Original Order Id"))?,
@@ -34,9 +54,12 @@ impl OrderService {
         let mut items = vec![];
         let mut index = 1;
         for basket_item in basket.basket_items {
+            let order_transaction_item_id = format!("{}-{}", order_transaction_id, index);
             let mut inventories = vec![];
+            let mut order_transaction_item_inventory_index = 1; 
             for basketed_inventory in basket_item.basketed_inventories {
                 let inventory = OrderTransactionItemInventory {
+                    id: format!("{}-{}", order_transaction_item_id, order_transaction_item_inventory_index),
                     inventory_id: ObjectId::parse_str(basketed_inventory.inventory_id)?,
                     event_id: ObjectId::parse_str(basketed_inventory.event_id)?,
                     name: basketed_inventory.name,
@@ -44,10 +67,11 @@ impl OrderService {
                 };
 
                 inventories.push(inventory);
+                order_transaction_item_inventory_index += 1;
             }
 
             let item = OrderTransactionItem {
-                id: format!("{}-{}", order_transaction_id, index),
+                id: order_transaction_item_id,
                 created_at: Utc::now(),
                 price: basket_item.price,
                 inventories
@@ -87,5 +111,52 @@ impl OrderService {
         self.order_transaction_repository.save(&order_transaction).await?;
 
         return Ok(order_id.to_hex());
+    }
+}
+
+fn mpa_order_transaction_to_dto(order_transaction: OrderTransaction) -> data_transfer_objects::OrderTransaction {
+    
+    let dto = data_transfer_objects::OrderTransaction {
+        id: order_transaction.id.to_hex(),
+        order_id: order_transaction.order_id.to_hex(),
+        r#type: order_transaction.r#type.clone(),
+        basket_id: order_transaction.basket_id.clone(),
+        items: order_transaction.items.iter().map(mpa_order_transaction_item_to_dto).collect(),
+        payments: order_transaction.payments.iter().map(mpa_order_transaction_payment_to_dto).collect(),
+        created_at: order_transaction.created_at,
+    };
+
+    dto
+}
+
+fn mpa_order_transaction_item_to_dto(order_transaction_item: &OrderTransactionItem) -> data_transfer_objects::OrderTransactionItem {
+    data_transfer_objects::OrderTransactionItem {
+        id: order_transaction_item.id.clone(),
+        created_at: order_transaction_item.created_at,
+        price: order_transaction_item.price,
+        inventories: order_transaction_item.inventories.iter().map(mpa_order_transaction_item_inventory_to_dto).collect(),
+    }
+}
+
+fn mpa_order_transaction_item_inventory_to_dto(order_transaction_item_inventory: &OrderTransactionItemInventory) -> data_transfer_objects::OrderTransactionItemInventory {
+    data_transfer_objects::OrderTransactionItemInventory {
+        id: order_transaction_item_inventory.id.clone(),
+        inventory_id: order_transaction_item_inventory.inventory_id.to_hex(),
+        event_id: order_transaction_item_inventory.event_id.to_hex(),
+        name: order_transaction_item_inventory.name.clone(),
+        created_at: order_transaction_item_inventory.created_at,
+    }
+}
+
+fn mpa_order_transaction_payment_to_dto(order_transaction_payment: &OrderTransactionPayment) -> data_transfer_objects::OrderTransactionPayment {
+    data_transfer_objects::OrderTransactionPayment {
+        id: order_transaction_payment.id.clone(),
+        payment_id: order_transaction_payment.payment_id.to_hex(),
+        amount: order_transaction_payment.amount,
+        currency: order_transaction_payment.currency.clone(),
+        provider: order_transaction_payment.provider.clone(),
+        status: order_transaction_payment.status.clone(),
+        payment_type: order_transaction_payment.payment_type.clone(),
+        created_at: order_transaction_payment.created_at,
     }
 }
