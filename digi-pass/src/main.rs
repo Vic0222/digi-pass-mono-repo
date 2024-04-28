@@ -153,7 +153,8 @@ async fn main() {
     let order_service = OrderService::new(client.clone(), database.clone());
 
     let pass_private_key = env::var("PassPrivateKey").expect("Pass private key not found").to_string();
-    let pass_service = PassService::new(pass_private_key).expect("Failed creating PassService");
+    let pass_public_key = env::var("PassPublicKey").expect("Pass public key not found").to_string();
+    let pass_service = PassService::new(pass_private_key, pass_public_key, client.clone(), database).expect("Failed creating PassService");
 
     let state = Arc::new(AppState {
         event_service,
@@ -201,6 +202,10 @@ async fn main() {
         .route(
             "/passes/:order_transaction_item_inventory_id",
             get(self::passes::passes_controller::get),
+        )
+        .route(
+            "/passes/verify",
+            post(self::passes::passes_controller::verify),
         )
         .layer(jwt_auth.into_layer())
         .route(

@@ -115,7 +115,7 @@ POST {{baseUrl}}/payments/webhook/maya
 Content-Type: application/json
 
 {
-  "id": "35b25be8-7430-4075-bd1f-32ae78a0e2c3",
+  "id": "56b9d1df-4f4d-4e79-9e16-ea6a100fab06",
   "isPaid": true,
   "status": "PAYMENT_SUCCESS",
   "amount": "10",
@@ -158,5 +158,19 @@ Content-Type: application/json
 x-api-key: {{api_key}}
 
 {
-    "basket_id" : "66026740faddba649fd81f89"
+    "basket_id" : "{{CreateBasket.response.body.$.basket_id}}"
+}
+
+###
+GET {{baseUrl}}/passes/6627d3d0b3e2531e535e61dd-1-1
+Authorization: Bearer {{authToken}}
+
+###
+POST {{baseUrl}}/passes/verify
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+x-api-key: {{api_key}}
+
+{
+  "jwt": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI2NjI3ZDNkMGIzZTI1MzFlNTM1ZTYxZGQtMS0xIiwiZXhwIjoxNzE0MzE2NTYzLCJpYXQiOjE3MTQzMTI5NjMsIm5iZiI6MCwiaW52ZW50b3J5X2lkIjoiNjYwMjY3NDlmYWRkYmE2NDlmZDgyMzdjIiwiZXZlbnRfaWQiOiI2NjAyNjc0MGZhZGRiYTY0OWZkODFmODkiLCJldmVudF9uYW1lIjoiVGVzdCBFdmVudCAyMzIzIn0.UHYHAFadO-U2HmweDD-WPhIYnQOlPhH_gJghcFEySVTjPFFy9kJJmcr80elwTlS0v28wIqua9VFnTVTPOGh9uTK9J3YpzztWrLOOairKMOvEmcmQ_bgVUgVn2qGxmTVMRnt_GooXIuDWqMxY9EIvxfCTZMAq_O6Xj3a5tqwhQsa_7BQzthxQWmWi5npdd5ZZH_9gLCRDCchzQsMB5DfupwWMEMwuZc8scnB7taxISC2miwZUJGtXKagSEyth2P4dldaUzXYXGBOTXwfbi4Y-6DdssHdT6gfte1yZtpBFLUlCIJcJocP0OI8GyurKnWur8LpkemgRL1YIQUhn01ytZA"
 }

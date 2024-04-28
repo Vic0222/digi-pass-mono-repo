@@ -1,9 +1,9 @@
 use std::sync::Arc;
 use axum::{extract::{Path, State}, response::IntoResponse, Json};
 use reqwest::StatusCode;
-use crate::app_state::AppState;
+use crate::{app_state::AppState, validation::ValidatedJson};
 
-use super::errors::PassError;
+use super::{data_transfer_objects::{JwtPass, VerificationResult}, errors::PassError};
 
 
 pub async fn get(
@@ -22,4 +22,28 @@ pub async fn get(
         },
         Err(err) => PassError::from(err).into_response(),
     }
+}
+
+pub async fn verify(
+    State(state): State<Arc<AppState>>,
+    ValidatedJson(jwt_pass): ValidatedJson<JwtPass>,
+) -> impl IntoResponse  {
+    let result = state.pass_service.verify_pass(jwt_pass).await;
+    
+    let response = match result {
+        Ok(valid) => {
+           
+           if valid {
+            (StatusCode::OK, Json(VerificationResult::new(valid))).into_response() 
+           }else{
+            (StatusCode::UNAUTHORIZED, Json(VerificationResult::new(valid))).into_response()
+           }
+        },
+        Err(err) => {
+            tracing::error!("Failed verifying pass {:?}", err);
+            PassError::from(err).into_response()
+        }
+    };
+
+    return response;
 }

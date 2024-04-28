@@ -1,31 +1,47 @@
-use std::{fs, str::from_utf8};
+use std::{str::from_utf8, sync::Arc};
 
 use base64::{engine::general_purpose::STANDARD, Engine as _};
+use bson::oid::ObjectId;
 use chrono::Utc;
-use jsonwebtoken::{encode, EncodingKey, Header};
+use jsonwebtoken::{encode, DecodingKey, EncodingKey, Header};
+use mongodb::Client;
 
 use crate::orders::{application::OrderService, data_transfer_objects::OrderTransaction};
 
-use super::{data_models::Pass, data_transfer_objects::JwtPass};
+use super::{data_models::{Pass, PassVerification}, data_transfer_objects::JwtPass, persistence::{MongoDbPassVerificationRepository, PassVerificationRepository}};
 
 pub struct PassService{
     encoding_key: EncodingKey,
+    decoding_key: DecodingKey,
+    pass_verification_repository: Arc<dyn PassVerificationRepository>
 }
 
 impl PassService {
     
     
-    pub fn new(pass_private_key: String) -> anyhow::Result<Self> {
+    pub fn new(private_key: String, public_key: String, client: Client, database: String) -> anyhow::Result<Self> {
 
-        let private_key = STANDARD.decode(&pass_private_key)
+        let private_key = STANDARD.decode(&private_key)
             .map_err(|_| anyhow::anyhow!("Failed decoding private key"))?;
 
         let private_key = from_utf8(&private_key)
             .map_err(|_| anyhow::anyhow!("Failed decoding private key"))?;
             
         let encoding_key = EncodingKey::from_rsa_pem(&private_key.as_bytes())?; // IMPROVEMENT:  Get from Key Management Service
+
+        let public_key = STANDARD.decode(&public_key)
+            .map_err(|_| anyhow::anyhow!("Failed decoding public_key key"))?;
+
+        let public_key = from_utf8(&public_key)
+            .map_err(|_| anyhow::anyhow!("Failed decoding public_key key"))?;
+            
+        let decoding_key = DecodingKey::from_rsa_pem(&public_key.as_bytes())?; // IMPROVEMENT:  Get from Key Management Service
+        
+        let pass_verification_repository = Arc::new(MongoDbPassVerificationRepository::new(client, database));
         Ok(Self {
             encoding_key,
+            decoding_key,
+            pass_verification_repository
         })
     }
 
@@ -65,6 +81,27 @@ impl PassService {
 
         Ok(Some(JwtPass::new(token)))
     }
+
+    pub async fn verify_pass(&self, pass: JwtPass) -> anyhow::Result<bool> {
+        let token = &pass.jwt;
+
+        let decoded_token = jsonwebtoken::decode::<Pass>(token, &self.decoding_key, &jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::RS256))?;
+        
+        //check if already verified
+        let inventory_id = ObjectId::parse_str(&decoded_token.claims.inventory_id)?;
+        let pass_verification = self.pass_verification_repository.get_last_pass_verification(inventory_id).await?;
+        if let Some(_) = pass_verification {
+            tracing::info!("Pass already verified");
+            return Ok(false);
+        }
+        //record pass verification
+        let pass_verification = PassVerification {
+            inventory_id : inventory_id,
+            verification_time : Utc::now()
+        };
+        self.pass_verification_repository.save_pass_verification(&pass_verification).await?;
+        return Ok(true);
+    }
 }
 
 fn assemble_pass(order_transaction_item_inventory_id: &str, order_transaction: &OrderTransaction) -> Option<Pass> {
@@ -75,7 +112,7 @@ fn assemble_pass(order_transaction_item_inventory_id: &str, order_transaction: &
         //convert order_transaction_item_inventory to Pass{}
         let pass = Pass {
             sub: inventory_item.id.clone(),
-            exp: 0, //TODO get from event end date
+            exp: (Utc::now().timestamp() + 3600) as usize, //TODO get from event end date
             iat: Utc::now().timestamp() as usize,
             nbf: 0, //TODO get from event start date,
             inventory_id: inventory_item.inventory_id.clone(),
